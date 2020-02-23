@@ -1,0 +1,235 @@
+	Lucrarea nr. 7 (2: Arbori)
+               Prelucrarea arborilor binari
+
+
+1. Prezentarea problemei:
+
+
+   Sa se implementeze un set de functii care realizeaza  urmatoa
+rele operatii:
+   -  adauga( t,id ) introduce identificatorul "id" in tabela  de
+      simboluri t
+   -  prezent( t,id ) returneaza adevarat sau fals dupa cum 
+      identificatorul "id" este prezent sau nu in tabela de 
+      simboluri
+   -  sterge( t,id ) elimina identificatorul "id" din tabela t
+   -   reuneste( t1,t2,t ) tabela t va contine  toti  identifica-
+       torii prezenti in t1 sau t2
+   -  intersectie( t1,t2,t ) tabela t va contine toti identifica
+      torii prezenti atit in t1 , cit si in t2
+   - scadere( t1,t2,t ) tabele t va contine toti identificatorii
+     care sint prezenti in t1 si absenti in t2
+  -  tipareste( t ) - tipareste in ordine alfabetica  identifica
+     torii din tabela t
+   Folosind functiile de mai sus sa se realizeze un program care
+citeste doua secvente de text consecutive , terminate fiecare  cu 
+o  marca EOF. Dupa citirea textelor se cere sa se  tipareasca  in 
+ordine  alfabetica identificatorii prezenti doar in primul  text, 
+apoi pe cei prezenti doar in cel de-al doilea text.
+In  final se vor tipari identificatorii prezenti atit in  primul, 
+cit si in al doilea text.
+OBS.  Se considera definita o functie getid( char *s ) , care  va 
+furniza in parametrul s, sirul de caractere corespunzator urmato
+rului identificator din intrare. Functia va returna 0 atunci cind 
+s-a intilnit EOF si o valoare diferita de 0 in caz contrar.
+
+2. Prezentarea programului:
+
+   Tabela de simboluri este implementata folosind arbori binari
+ordonati  dupa  lexema identificatorului. Structura unui  nod  al 
+arborelui este reprezentata astfel :
+
+
+                       --------------- 
+                       |    lexema   |
+                       ---------------
+                       |    sting    |
+                       ---------------  pointeri de inlantuire
+                       |    drept    |  la fiul sting respectiv 
+                       ---------------        drept
+
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <conio.h>
+#define Max 14
+
+
+typedef struct pn{
+      char *lexema;
+      struct pn *sting,*drept;
+      }nod;
+
+
+int prezent(nod *t,char *id)
+{
+
+  if( t == NULL ) return 0;
+  else
+     if( strcmp( t->lexema, id ) < 0 )
+       return prezent( t->drept,id );
+      else
+	  if( strcmp(t->lexema,id) > 0 )
+	   return prezent( t->sting,id );
+       else return 1;
+}
+
+
+nod *adauga(nod *t,char *id)
+{
+
+     if( t == NULL )
+     {
+	t=(nod*)malloc(sizeof(nod));
+	t->lexema=(char*)malloc(strlen(id)+1);
+	strcpy(t->lexema,id);
+	t->sting=t->drept=NULL;
+     }
+     else
+	 if( strcmp( t->lexema,id ) < 0 )
+	    t->drept = adauga( t->drept,id );
+	 else
+	    if( strcmp( t->lexema,id ) > 0 )
+	    t->sting = adauga( t->sting,id );
+	      else printf("identificatorul %s apare in evidenta\n");
+     return t;
+}
+
+void copi1(nod *t1,nod **t){
+
+  if(t1!=NULL){
+    copi1(t1->sting,t);
+    *t =adauga(*t,t1->lexema);
+    copi1(t1->drept,t);
+	}
+}
+
+
+void copi2(nod *t2,nod **t){
+
+   if(t2!=NULL){
+       copi2(t2->sting,t);
+       if(prezent(*t,t2->lexema)==0) *t =adauga(*t,t2->lexema);
+       copi2(t2->drept,t);
+   }
+}
+
+
+void reuneste(nod *t1,nod *t2,nod **t){
+    copi1(t1,t);
+    copi2(t2,t);
+}
+
+void intersectie(nod *t1,nod *t2,nod **t){
+
+  if(t1!=NULL)
+  {
+      intersectie(t1->sting,t2,t);
+      if(prezent(t2,t1->lexema)==1) *t = adauga(*t,t1->lexema);
+      intersectie(t1->drept,t2,t);
+  }
+}
+
+void scadere( nod *t1 , nod *t2 , nod **t)
+{
+
+ if( t1 != NULL )
+ {
+     scadere(t1->sting,t2,t);
+     if( prezent( t2,t1->lexema ) == 0 )
+		 *t = adauga( *t , t1->lexema );
+     scadere(t1->drept,t2,t);
+ }
+
+}
+
+void tipareste(nod *t)
+{
+ if( t != NULL )
+ {
+    tipareste(t->sting);
+    printf("%s \n",t->lexema);
+    tipareste(t->drept);
+ }
+}
+
+int getid(char *s)
+{
+int i=0;
+char c=getchar();
+if(c=='%') return 0;
+while(c==' '|| c=='\n') c=getchar();
+while(isalpha(c)) { s[i++]=c; c=getchar(); };
+s[i]='\0';
+return i;
+}
+
+
+void main()
+{
+
+  nod *t,*tt,*ttt,*t1,*t2;
+  char s[Max];
+
+  clrscr();
+  t = tt = ttt = t1 = t2 = NULL;
+  printf("Se citeste primul text ,care se termina cu %\n");
+  while(getid(s)!=0) t1 = adauga( t1,s );
+  printf("Se citeste al doilea text ,care se termina cu %\n");
+  while(getid(s)!=0) t2 = adauga( t2,s );
+  reuneste(t1,t2,&t);
+  printf("*********reuniune:*********\n");tipareste(t);
+  scadere( t1,t2,&tt );
+  printf("*********scadere: *********\n");tipareste(tt);
+  intersectie( t1,t2,&ttt );
+  printf("*********intersectie:******\n");tipareste(ttt);
+
+}
+
+3. Comentarea programului
+
+   Functia adauga va introduce un nou identificator in tabela in
+cazul in care acesta nu apare sau tipareste un mesaj  caracteris
+tic , daca identificatorul este la o aparitie multipla. Introduc
+erea se realizeaza a.i. arborele rezultat sa fie ordonat alfabet
+ic. 
+   Functia prezent returneaza 1 daca identificatorul este  prezent 
+in tabela si 0 in caz contrar.
+   Functia  reuneste construieste o noua tabela t,  care  contine 
+identificatorii care apar atit in t1 , cit si in t2.Ea foloseste
+doua rutine copi1 si copi2 , cu rolul de a transfera  identifica
+torii din t1 si t2 in t.
+   Functiile  intersectie  si scadere  stabilesc  identificatorii 
+prezenti  simultan in ambele tabele ,  respectiv  identificatorii 
+care apar intr-o tabela si nu apar in cealalta.
+   Programul  principal preia identificatorii din intrare  si  ii 
+plaseaza in cele doua tabele. In continuare se apeleaza functiile 
+scadere  si reuneste , care vor construi tabelele cu  identifica
+torii care apar doar in primul text, respectiv cu identificatorii
+comuni. 
+
+
+
+4. Probleme propuse
+
+
+1. Sa se propuna un algoritm care sa construiasca un arbore
+binar de inaltime minima.
+
+2. O baza de date pastreaza informatiile despre marfurile  dintr-un
+magazin. Baza de date e realizata folosind un arbore binar. Sa 
+se scrie un program care realizeaza:
+  1. introduce o noua marfa in baza de date
+  2. tipareste baza de date ordonat dupa numele marfii si separat 
+dupa pret
+  3. sterge toate marfurile cu termenul de garantie expirat.
+  4.  creaza unui arbore binar ordonat dupa pret, arbore care  va 
+contine  doar marfurile cu un pret mai mic ca o valoare  data  p. 
+Valoarea p se citeste.
+ 
+3.*  Se  considera toate structurile posibile  de  arbori  binari 
+ordonati , avind nodurile etichetate cu numerele 1,2 ... n. Sa se
+determine arborele cu lungimea drumului intern minima.  
+

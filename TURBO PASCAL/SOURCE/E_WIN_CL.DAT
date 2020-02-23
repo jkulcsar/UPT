@@ -1,0 +1,9 @@
+
+  #include "g_win_cl.dat"
+
+  class error_window : general_window
+  {
+    public:
+      void create_error_window( char * );
+      void destroy_error_window( void );
+  };

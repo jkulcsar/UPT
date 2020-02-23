@@ -1,0 +1,12 @@
+
+  class settings
+    {
+      int     cul, bkcul;		// culoare de scriere si de fond
+      struct  textsettingstype txt;	// atributele de scriere ale textelor
+      struct  fillsettingstype fll;	// atributele de umplere
+
+      protected :
+	void put_settings( void );	// setare  atribute mod grafic
+	void get_settings( void );	// salvare atribute mod grafic
+
+    };

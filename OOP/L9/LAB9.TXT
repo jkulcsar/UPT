@@ -1,0 +1,164 @@
+			MOSTENIRE MULTIPLA
+
+	In limbajul C++ exista posibilitatea ca o clasa sa fie derivata din mai
+multe clase de baza. 
+
+Exemplu:
+	class B1
+	{
+	  //...
+	}
+	class B2
+	{
+	  //...
+	}
+	class B3
+	{
+	  //...
+	}
+	class D1 : B1
+	{
+	  B2 b1;
+	  B3 b2;
+	};
+Din punct de vedere al structurii de date, clasa "D1" este echivalenta cu forma:
+	class D1 : B1, B2, B3
+	{
+	  //...
+	};
+Din punct de vedere functional exista totusi diferente, cum ar fi, de exemplu,
+modul de apel al metodelor claselor membre. Mostenirea multipla elimina aceste 
+neajunsuri. Astfel, o clasa de derivata poate avea simultan mai multe clase de 
+baza. 
+	Exista totusi si unele restrictii:
+1. O clasa derivata "D" nu poate mosteni direct de doua ori aceeasi clasa "B".
+
+2. O clasa derivata "D" nu poate mosteni simultan o clasa "B" si o alta "D1", 
+derivata tot din "B". De asemenea, nu pot fi mostenite simultan doua clase "D1"
+si "D2" aflate in relatia de mostenire "B"->...->"D1"->...->"D2".
+Exemplu:
+	class B
+	{
+	  //..
+	};
+	class C1 : B
+	{
+	};
+	class C2 : C1
+	{
+	};
+	class D1 : B, C2   //EROARE
+	{
+	};
+	class D2 : C1, C2   //EROARE
+	{
+	};
+In schimb, este corecta o mostenire de genul :
+	class B
+	{
+	  //...
+	};
+	class D1 : B
+	{
+	};
+	class D2 : B
+	{
+	};
+	class D : D1, D2
+	{
+	};
+	Pentru a realiza o mostenire multipla este suficient sa se specifice 
+dupa numele clasei derivate o lista de clase de baza separate prin virgula 
+(evident, aceste nume pot fi prefixate cu modificatori de acces "public" sau 
+"privat"). 
+	Ordinea claselor de baza nu este indifirenta. Apelul constructorilor 
+respectivi se va face exact in ordinea enumerarii numelor claselor de baza. 
+Ca si in cazul mostenirii simple, apelul apelul constructorilor tuturor 
+claselor de baza se va efectua inaintea eventualelor initializari de 
+variabile-membru. Mai mult, aceasta ordine nu poate fi modificata nici chiar
+de ordinea apelului explicit al constructorilor claselor de baza in cadrul 
+constructorilor clasei derivate.
+Exemplu:
+	class B1
+	{
+		char c;
+	   public : 
+		B1(char c1) : c(c1) {};
+	};
+	class B2
+	{
+		int c;
+	    public :
+		B2(int c1) : c(c1) {};
+	};
+	class D : B1, B2
+	{
+		char a, b;
+	    public :
+		D(char a1, char b1) : a(a1), b(b1)
+		B2((int) a1), B1(b)
+	   {
+		//...
+	   }
+	};
+	void main(void)
+	{
+	  D d(3,3);
+	}
+	Indiferent de ordinea initializarii variabilelor si de cea a 
+constructorilor specificati explicit, in definirea constructorului clasei derivate
+
+	D(char a1,char b1) : a(a1),b(b1)
+		B2((int) a1),B1(b1) {};
+
+succesiunea operatiilor va fi urmatoarea : apelul constructorului "B1", apoi "B2"
+si, doar la sfirsit, initializarea lui "a" si "b".
+	O situatie cu totul particulara o au asa-zisele CLASE VIRTUALE. Pentru a avea 
+o imagine cit mai clara asupra problemei , sa analizam exemplul de mai jos :
+
+Exemplu :
+class B
+{
+};
+
+class D1 : B
+{
+};
+
+class D2 : B
+{
+};
+
+class M1 : D1,public D2
+{
+};
+
+class M2 : virtual D1, virtual public D2
+{
+};
+
+	In urma mostenirii claselor "D1" si "D2", clasa "M1" va ingloba doua
+obiecte de tipul "B" (cite unul pentru fiecare din cele doua clase de baza).
+In practica, ar putea exista situatii in care este de dorit mostenirea unui singur
+obiect de tip "B". Pentru aceasta se va proceda ca si in cazul clasei "M2" :
+se vor prefixa cele doua clase de baza cu cuvintul cheie "virtual". In urma 
+acestei decizii, clasa "M2" nu va contine decit O SINGURA INSTANTIERE A CLASEI "B".
+	Cui apartine aceasta unica instantiere (lui D1 sau D2)?
+Instantierea in cauza va apartine lui "D1", adica primei clase virtuale(din lista 
+claselor de baza) care a fost derivata din "B".
+
+	Definirea claselor virtuale ne obliga sa modificam regulile de apelare
+a constructorilor claselor de baza.In cele ce urmeaza vom prezenta noul set de reguli :
+R1.	Constructorii claselor de baza virtuale vor fi apelati INAINTEA celor corespunzind
+	unor clase de baza ne-virtuale.
+R2.	In caz ca o clasa poseda mai multe clase de baza virtuale,constructorii
+	lor vor fi apelati in ordinea in care clasele au fost declarate in lista claselor de baza.
+	Apoi vor fi apelati (tot in ordinea declararii) constructorii claselor
+	de baza ne-virtuale, si abia in cele din urma constructorul clasei derivate.
+R3.	Chiar daca in ierarhia claselor de baza exista mai mult de o instantiere
+	a unei clase de baza virtuale,constructorul respectiv va fi apelat doar o singura data.
+R4.	Daca in schimb, in aceeasi ierarhie exista atit instantieri virtuale cit si ne-virtuale
+	ale unei aceleiasi clase de baza, constructorul va fi apelat :
+	O SINGURA DATA		- pentru toate instantierile virtuale;
+	DE "N" ORI		- pentru cele ne-virtuale (daca exista "N" instantieri de acest tip).		
+

@@ -1,0 +1,231 @@
+
+Programarea Sistemelor de Conducere Distribuita
+
+			LABORATOR 2
+
+		Programul de retea SYSCON
+
+		Crearea unor utilizatori
+
+	Pasii care trebuie parcursi pentru a crea utilizatori sunt
+urmatorii:
+
+1. conectarea in retea se face prin utilizatorul supervisor sau un
+utilizator echivalent cu el
+2. se lanseaza programul
+3. se selecteaza optiunea "User Information" din meniul principal
+   se va afisa o lista cu utilizatorii existenti pe retea
+4. se apasa tasta Ins. se va deschide fereastra User Name
+5. se introduce numele noului utilizator. Dupa confirmarea numelui cu
+tasta Enter, se deschide fereastra Path to Create User's Home
+Directory. Implicit directorul utilizatorului s-ar crea in directorul
+radacina. Calea afisata se poate modifica cu cea dorita. In general
+este indicat sa nu se genereze in radacina.
+6. dupa confirmarea caii directorului utilizatorului cu tasta Enter,
+se selecteaza utilizatorul creat
+7. se deschide meniul "User Information". Se selecteaza optiunea
+"Trustee Directory Assignments". Initial acesta lista contine doua
+elemente: drepturile in directorul utilizatorului si in directorul
+creat in MAIL corespunzator utilizatorului creat.
+8. in acest moment se pot introduce noi drepturi. 
+9. pentru a introduce noi elemente in lista se apasa tasta Ins. Calea
+dorita poate fi construita automat, apasand inca o data tasta Ins. Se
+alege server-ul dorit, volumul si calea dorita. Cand calea este
+completa se apasa tasta Esc. Initial drepturile asociate vor fi [R F]
+Drepturile pe o cale din lista se pot modifica astfel: 
+	- se selecteaza elementul dorit
+	- Pentru a insera noi drepturi se apasa tasta Ins. Se va
+afisa o lista cu drepturile ramase. Se selecteaza cele dorite (cu
+tasta F5) si se apasa Enter. Drepturile selectate vor fi inserate in
+lista de drepturi a caii selectate
+	- Pentru a sterge unul sau mai multe drepturi se foloseste
+tasta Del
+	NetWare 3.11 poate face aceste setari de drepturi si asupra
+fisierelor prin optiune "Trustee File Assignments" din meniul "User
+Information".
+	SYSCON si FILER permit asignarea acestor drepturi pe fiecare
+fisier in parte, ceea ce este destul de incomod. In cazul in care se
+doreste setarea drepturilor pe mai multe fisire se recomanda
+utilizarea comenzii GRANT care va fi descrisa in alt laborator.
+10. se selecteaza optiunea "Account Restrictions". Rolul fiecarei
+optiuni este descris in curs. Se fac modificarile dorite si se salveaza 
+parasind meniul cu tasta Esc.
+11. se selecteaza "Full Name" pentru a introduce numele intreg al
+utilizatorului creat
+12. se selecteaza "Change Password" pentru a introduce parola. Dupa
+ce ea a fost confirmata se cere o noua introducere a ei pentru
+siguranta. Supervizorul poate modifica parola oricarui utilizator. Un
+utilizator obisnuit poate sa-si modifice doar parola lui daca are
+dreptul sa o faca.
+
+
+		Limitarea conectarilor simultane
+
+	Se vor parcurge urmatorii pasi:
+1. se lanseaza SYSCON
+2. se selecteaza optiunea "User Information" din meniul principal
+3. se alege utilizatorul al carui limitari vor fi introduse
+4. se selecteaza optiunea "Account Restrictions"
+5. se seteaza campul "Concurrent Connections" pe yes
+6. se specifica in campul "Maximum Connections" numarul de conectari
+simultane
+
+
+		Limitarea conectarii de la anumite 
+			statii de lucru
+
+	
+	De exemplu, un utilizator are sarcina se a face salvarile
+lunare pe un dispozitiv de salvare. In aceasta situatie, i se va
+limita accesul acelui utilizator astfel incat el sa se poata conecta
+numai pe statia la care este conectat dispozitivul de salvare.
+	Orice conectare de pe alta statie nu va fi permisa.
+	Pentru a limita conectarile se parcurg urmatorii pasi:
+1. se creaza un utilizator, sau se alege unul existent
+2. conectarea se va face pe statia de interes
+3. pentru a afla adresa de retea si de nod a statiei se foloseste
+comanda:
+	USERLIST /A
+Statia curenta va fi marcata cu un "*".
+4. se lanseaza SYSCON
+5. se selecteaza "User Information" din meniul principal
+6. se selecteaza utilizatorul care va fi restrictionat
+7. se selecteaza "Station Restrictions"
+8. se apasa tasta Ins si se introduce adresa de retea  
+9. la intrebarea "Allow Login From All Nodes" se raspunde cu No
+10. se introduce adresa de nod
+In acest moment utilizatorul se va putea conecta in retea doar de la
+statiile cu adresele egale cu adresele din lista "Allowed Login
+Address"
+	
+
+
+		Limitarea spatiului pe disc
+
+	NetWare 2.2 limiteaza spatiul pe intreg server-ul indiferent
+de numarul de volume. NetWare 3.11 limiteaza spatiul, individual pe
+fiecare volum.
+
+Pasii:
+1. se lanseaza SYSCON
+2. se selecteaza "User Information"
+3. se alege utilizatorul care va fi restrictionat
+4. se selecteaza optiunea "Volume/Disk Restrictions"
+5. pe versiunea 3.11 se selecteaza volumul dorit
+6. se seteaza campul "Limit Volume/Server Space" pe Yes
+7. se introduce limita in KB la campul "Volume Space Limit/Maximum
+Server Disk Space"
+8. se salveaza parasind starea curenta cu tasta Esc
+
+
+		Limitarea momentelor de conectare
+
+	Prin aceasta limitare se elimina riscul conectarii unor
+utilizatori neautorizati, care cunosc un nume de login si parola lui,
+sa se conecteze in retea in afara timpului de lucru. Aceasta optiune
+se foloseste si in cazul unor salvari lunare pe dispozitive de
+salvare. Cand au loc salvari, toti utilizatorii vor fi limitati sa se
+conecteze in retea.
+
+Pasii:
+1. se lanseaza SYSCON
+2. se selecteaza "User Information"
+3. se alege utilizatorul care va fi restrictionat
+4. se selecteaza optiunea "Time Restrictions"
+5. se va pune "*" in dreptul orelor cand utilizatorului i se va
+permite accesul. 
+6. se salveaza cu tasta Esc
+
+	In cazul in care un utilizator incearca sa se conecteze in
+retea intr-un moment nepermis, se va afisa un mesaj de eroare si
+conectarea nu va fi realizata. Daca un utilizator este conectat si
+timpul permis conectarii a expirat, NetWare informeaza utilizatorul
+printr-un mesaj. Utilizatorul trebuie sa-si salveze rapid totul si sa
+se deconecteze de la retea cu comanda LOGOUT. Daca nu se va
+deconecta, reteaua il va deconecta automat, riscand sa-i distruga
+fisierele ramase deschise.
+	Este destul de incomoda setarea acestei optiuni pentru
+fiecare utilizator in parte. In acest scop, programul are o optiune
+de setare a unor parametrii impliciti, descrisa in continuare.
+
+		Setarea parametrilor impliciti ai 
+			utilizatorilor
+
+	Aceste setari sunt valabile pentru orice utilizator nou
+creat. 
+
+Pasii:
+1. conectarea in retea se va face prin utilizatorul supervisor
+2. se lanseaza SYSCON
+3. se selecteaza optiunea "Supervisor Options" din meniul principal
+4. se selecteaza optiunea "Default Account Balance/Restrictions"
+5. se introduc valorile implicite si se salveaza cu tasta Esc
+6. se selecteaza optiunea "Default Time Restrictions" si se fac
+modificarile dorite
+7. se salveaza cu tasta Esc
+
+
+	Dupa ce aceste setari au fost facute utilizatorii creati se
+pot folosi pentru conectare in retea. 
+
+
+		Crearea si administrarea grupurilor 
+			de utilizatori
+
+	Grupurile de utilizatori se folosesc pentru usurarea
+administrarii retelei.
+	Utilizatorii, in functie de drepturile lor, pot sa
+vizualizeze grupurile si sa le modifice unele optiuni. Dar nu pot sa
+creeze grupuri noi. Singurul care poate crea este supervisorul sau un
+utilizator echivalent cu el.
+
+Pasii:
+1. se lanseaza SYSCON
+2. se selecteaza optiunea "Group Information" din meniul principal
+3. pentru a crea un grup se apasa tasta Ins si se introduce numele
+grupului
+4. se selecteaza grupul dorit
+5. din meniul "Group Information" se selecteaza optiunea "Trustee
+Directory Assignments" 
+6. se introduc directoarele si drepturile in aceste directoare la fel
+ca si in cazul unui singur utilizator. Modificarile facute vor avea
+efect asupra tuturor membrilor grupului.
+7. lista de membri ai grupului se modifica prin optiunea "Member
+List" 
+
+	Un utilizator poate fi facut membru al unui grup prin
+optiunea "Groups Belonged To" din meniul "User Information". Dar de
+obicei se foloseste optiunea "Member List" din meniul "Group
+Information"
+
+
+		Asigurarea securitatii folosind 
+	       detectarea conectarilor incorecte
+
+	Reteaua dezactiveaza un utilizator daca acesta a incercat
+conectarea in retea si nu i-a fost permis.
+
+Pasii:
+1. conectarea se face cu supervisor
+2. se lanseaza SYSCON
+3. se selecteaza optiunea "Supervisor Options" din meniul principal
+4. se selecteaza optiunea "Intruder Detection/Lockout"
+5. se apasa Y pentru a seta pe Yes optiunea "Detect Intruders"
+6. se vor afisa valorile initiale: numarul de conectari incorecte
+permise (7) in 30 de minute.
+7. aceste valori initiale pot fi schimbate. Numarul de conectari
+incorecte trebuie sa fie un numar pozitiv. 
+8. la optiunea "Bad Login Count Retention Time" se specifica perioada
+de timp pe parcursul careia se permit conectarile incorecte, in zile,
+ore si minute.
+9. pentru a se dezactiva o perioada de timp utilizatorul care a
+incercat conectarea incorecta, dupa conectari, se seteaza optiunea
+"Lock Account After Detection" pe Yes
+10. perioada de timp pe care va fi dezactivat se introduce la optiune
+"Length of Account Lockout", in zile, ore si minute.
+
+	Dupa ce un utilizator a fost dezactivat, el nu se mai poate
+conecta in retea pana cand nu se va scurge perioada de timp specificata
+la optiunea "Length of Account Lockout".
+
+

@@ -1,0 +1,471 @@
+
+LUCRAREA 9
+
+
+               Tipul abstract tabela de simboluri
+
+
+
+1. Definirea tipului abstract tabela de simboluri    
+
+   Sa se defineasca tipul abstract tabela de simboluri , care sa 
+contina operatori pentru urmatoarele operatii:
+  1.) introducerea in tabela a unui identificator impreuna cu
+ informatiile asociate lui
+  2.) regasirea din tabela a informatiilor asociate cu un iden-
+tificator
+  3.) stabilirea daca tabela este plina sau nu
+  4.) initializarea tabelei de simboluri
+  5.) gasirea in tabela a unui identificator
+  6.) afisarea identificatorilor din tabela impreuna cu informa-
+tiile asociate lor
+  7.) stergerea unui identificator din tabela
+  8.) ordonarea identificatorilor din tabela
+   Tabela poate contine maxim 200 de identificatori, iar informa-
+tia asociata cu un identificator se refera la faptul ca acesta 
+reprezinta un nume de variabila, de functie , un cuvint cheie sau
+eticheta.
+   Un identificator :
+     .  urmat de paranteze rotunde () este asociat cu un nume de
+        functie
+     .  urmat de doua puncte : este interpretat ca o eticheta
+     .  ce se gaseste intr-o tabela de cuvinte  cheie "key_tab",
+        este interpretat ca si cuvint cheie
+     .  in celelalte situatii este interpretat ca si variabila
+   Folosind tipul abstract astfel definit sa se realizeze urmatorul
+program:
+   Se citeste un text care se incheie cu o marca EOF si se gasesc 
+identificatorii din text impreuna cu informatiile referitoare la
+felul lor. Acesti identificatori se introduc intr-o tabela de
+simboluri, asigurindu-ne ca un identificator sa apara o singura
+data. In caz contrar se semnaleaza un mesaj de eroare. Dupa 
+preluarea tuturor identificatorilor din text se afiseaza tabela 
+de simboluri. In continuare se ordoneaza tabela si se tipareste
+continutul tabelei astfel obtinute.
+
+
+2.Prezentarea programului
+
+
+  Structura tabelei de simboluri
+
+ 
+              id                 t
+         -------------------------------
+    0    |              |              |
+         -------------------------------
+    1    |              |              |
+         -------------------------------
+    2    |              |              |
+         -------------------------------
+                .
+                .
+         -------------------------------
+next ->  |              |              |
+         -------------------------------
+                .
+                .
+         -------------------------------
+  N-1    |              |              |
+         -------------------------------
+
+
+    Repartizarea pe fisiere a programului
+
+              ------------------
+              |    tabsim.h    |  tabsim.h contine definitia 
+              ------------------  tipurilor de date folosite
+                                  in program, precum si declara-
+                                  tiile functiilor ce prelu-
+                                  creaza tipul abstract tabela
+                                  de simboluri
+
+
+      tabsim.c                           main.c
+  
+      .full                             .getid
+      .clear                            .e_cuv_cheie   
+      .in_table                         .completeaza
+      .add                              .main
+      .get
+      .type
+      .del
+      .sort        
+
+ tabsim.c contine implementarea
+ tipului abstract tabela de
+ simboluri
+
+
+
+		      fisierul tabsim.h
+
+
+
+typedef enum { eof,var,  proc,cuv_cheie, eticheta } tip_id;
+
+typedef struct
+{
+  char *id;
+  tip_id t;
+} tip_info;
+
+void clear( void );
+int in_table( char* );
+int full( void );
+void add( char* , tip_id );
+tip_id get( char* );
+void type( void );
+void del( char* );
+void ssort( void );
+
+
+
+
+		     fisierul tabsim.c
+
+
+#include "tabsim.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#define N     200
+#define TRUE  1
+#define FALSE 0
+
+static tip_info st[ N ];
+static int next =0;
+
+
+void clear( void )
+{
+  next =0;
+}
+
+
+int full( void )
+{
+  return next == N;
+
+}
+
+int in_table( char *s )
+{
+  int i;
+
+  for( i=0; i< next;i++ )
+    if( strcmp( s, st[i].id ) == 0)
+      return TRUE;
+  return FALSE;
+}
+
+void type( void )
+{
+  int i;
+
+  for( i=0; i < next; i++ )
+     printf(" intrarea %d : %s %d \n",i,st[i].id,st[i].t);
+}
+
+void add( char *x, tip_id t )
+{
+  if( full() )
+  {
+    printf(" add: Eroare tabela e plina \n");
+    exit( 1 );
+  }
+  else
+   if(( st[ next ].id = malloc( strlen( x ) + 1)) == NULL)
+   {
+     printf("add : Eroare memorie insuficienta \n");
+     exit( 1 );
+   }
+    else
+     {
+       strcpy( st[ next ].id,x );
+       st[ next++ ].t= t;
+     }
+}
+
+void del( char *x )
+{
+ int i;
+ for( i=0; i< next ; i++ )
+  if( strcmp( x, st[i].id ) == 0)
+  {
+    free( st[ i ].id );
+    st[ i ] = st[ next-- ];
+    return;
+  }
+ printf(" del: eroare - identificatorul %s nu apare in tabela\n",x);
+}
+
+tip_id get( char *x )
+{
+ int i;
+ for( i=0; i < next; i++ )
+  if( strcmp( x, st[ i ].id ) == 0)
+      return st[ i ].t;
+ printf(" get: eroare -identificatorul %s nu apare in tabela\n",x);
+ return NULL;
+}
+
+
+void partition( int s, int d, int *i, int *j )
+{
+
+  tip_info r, t;
+  int ri , rj;
+
+  r = st[ ( s + d )/ 2 ];
+  ri = s; rj = d;
+  while( ri <= rj )
+  {
+   while( strcmp( st[ ri ].id , r.id ) < 0 ) ri++;
+   while( strcmp( st[ rj ].id , r.id ) > 0 ) rj--;
+   if( ri <= rj )
+   {
+
+     t = st[ ri ];
+     st[ ri ] = st[ rj ];
+     st[ rj ]= t;
+     ri++; rj--;
+
+   }
+  }
+
+  *i = ri;
+  *j = rj;
+
+}
+
+
+void sort( int s, int d )
+{
+ tip_info t;
+ int i,j;
+
+ if( s > d ) return;
+  else
+    if( s == d - 1 )
+    {
+      if( strcmp( st[ d ].id,st[ s ].id ) < 0 )
+      {
+	t = st[ d ];
+	st[ d ] = st[ s ];
+	st[ s ] = t;
+      }
+    }
+    else
+    {
+      partition( s, d , &i, &j );
+      sort( s, j );
+      sort( i, d );
+    }
+ }
+
+
+ void ssort( void )
+ {
+
+  sort( 0,next-1 );
+
+ }
+
+
+
+		       fisierul main.c
+
+
+#include <stdio.h>
+#include <ctype.h>
+#include "tabsim.h"
+# define   eof           -1
+# define  variabila      0
+# define   cuv_cheie     1
+# define   proc          2
+# define   eticheta      3
+# define   eroare        4
+# define   nr_cuv_cheie  5
+# define   nr            15
+
+char keytab[] [ 8 ]={ "begin", "end", "program","while","repeat"};
+
+
+int e_cuv_cheie( char *x )
+{
+  int i;
+  for( i=0; i < nr_cuv_cheie ; i++ )
+    if( strcmp( x, keytab[ i ]) == 0 ) return cuv_cheie;
+  return variabila;
+}
+
+
+tip_id getid( char *s )
+{
+ char c;
+ int i;
+
+ while( ( c =getchar()) == ' ' || c == '\n'
+  || ( c != EOF && !isalpha( c ) && c !=':'
+  && c != '(' && c != ')' ));
+ if ( c == EOF ) return eof;
+  else
+    if( isalpha( c ))
+    {
+      i=0;
+      while( isalnum( c ))
+      {
+	s[ i++ ] =c;
+	c = getchar();
+      }
+      s[ i ] ='\0';
+      ungetc( c,stdin );
+      return e_cuv_cheie( s );
+  }
+  else
+    if( c == ':' ) return eticheta;
+     else
+       if( c == '(' )
+	{
+	   c = getchar();
+	   if( c != ')' )
+	   {
+	    printf(" Eroare: getid lipseste ) \n");
+	    while( (c = getchar()) != ')' );
+	    }
+	    return proc;
+	}
+	else return eroare;
+}
+
+
+void completeaza( void )
+{
+  int j = proc, i , fixat =0 ;
+  char p[ nr ], t[ nr ];
+
+  while( j != eof )
+  {
+    if( fixat != 0 )
+    {
+      strcpy( t, p );
+      i = j;
+      fixat =0;
+    }
+     else
+	 i = getid( t );
+    j = getid( p );
+    if( i == cuv_cheie )
+    {
+      if( in_table( t ) == 0 )
+	  add( t, i );
+       else
+	if( i != get( t ))
+  printf(" eroare: incompatibilitate de fel pentru identificatorul %s\n",t);
+    }
+     else
+       if( i == variabila )
+       {
+	if( j == proc || j == eticheta )
+	 if(in_table( t ) == 0 )
+	    add( t,j );
+	  else
+	   {
+	    if( j != get( t ))
+  printf(" eroare: incompatibilitate de fel pentru identificatorul %s\n",t);
+	 }
+	 else
+	 {
+	  if(in_table( t ) == 0 )
+	    add( t,i );
+	  else
+	    if( i != get( t ) )
+  printf(" eroare: incompatibilitate de fel pentru identificatorul %s\n",t);
+	  }
+  }
+  if( j == variabila || j == cuv_cheie ) fixat = 1;
+
+ }
+
+}
+
+
+void main()
+{
+  clear();
+  completeaza();
+  type();
+  ssort( );
+  type();
+}
+
+
+
+
+3.Comentarea programului
+
+  Programul este impartit pe trei fisiere:
+    
+      1. tabsim.h contine definitia tipurilor de date folosite in 
+program, precum si declaratiile functiilor de prelucrare aparti-
+nind tipului abstract tabela de simboluri
+      2. tabsim.c contine implementarea tipului abstract tabela
+de simboluri
+      3. main.c contine programul principal precum si functiile 
+folosite in acesta:
+      - getid recunoaste in intrare secventa de caractere ce 
+formeaza un identificator, : sau () si returneaza pentru fiecare 
+o valoare caracteristica
+      - e_cuv_cheie stabileste daca un identificator e cuvint 
+cheie sau nu
+      - completeaza - pentru un identificator verifica daca apare 
+sau nu in tabela. In caz negativ este introdus in tabela, impreu-
+na cu informatiile de fel. Daca apare deja in tabela si informa-
+tiile deduse pentru acelasi cuvint nu coincid se semnaleaza un 
+mesaj de eroare .
+ 
+
+4.Probleme propuse
+
+1. Sa se rezolve problema prezentata in ipoteza ca pentru imple-
+mentarea tabelei de simboluri se folosesc liste inlantuite.
+2. Sa se defineasca tipul de date abstract tampon circular, avind
+urmatoarele operatii:
+ int empty() - returneaza 1 daca tamponul e gol si 0 in caz 
+contrar
+ void clear()  -  initializeaza tamponul
+ int put( char *s ) - introduce sirul de caractere s in tampon.    
+Se returneaza  0 daca operatia s-a incheiat cu succes si -1 in 
+caz contrar.
+ int get( char *s ) - daca tamponul nu e gol, in s vom avea 
+urmatorul sir de caractere , iar functia returneaza 0. In caz 
+contrar se returneaza -1, fapt ce indica aparitia unei erori.
+3. Sa se realizeze un program C ce tine evidenta personalului 
+unei companii de dimensiuni mici (aprox. 50 de angajati ).Infor-
+matia referitoare la angajati este pastrata intr-un fisier si
+este folosita pentru initializarea bazei de date. Acest fisier
+contine linii de forma:
+ nume(19) virsta(2) adresa(11) numar_matricol(5) functie(5)
+Cimpurile sint separate printr-un blanc , iar numerele din paran-
+teza indica lungimea cimpului.
+ Functiile care trebuie implementate sint:
+  . initialize_db( db_file ) - initializeaza baza de date din
+                               fisierul db_file
+  . print_db()  - afiseaza baza de date
+  . emp_virsta( n ) - returneaza un pointer la virsta unei
+                          persoane cu numele n
+  . emp_adresa( n ) - returneaza un pointer la adresa unei
+                          persoane cu numele n
+  . emp_numar_matricol( n ) - returneaza un pointer la numa-
+                      rul matricol al unei persoane cu numele n
+  . emp_functie(  n ) - returneaza un pointer la functia unei                        
+                        persoane cu numele n
+  . introdu( n, v, a, nm, f) - introduce in baza de date o 
+                             persoana cu datele aferente
+  . cauta( n ) - verifica prezenta unei persoane in baza de date
+  . save_db( db_file ) - salveaza baza de date in fisierul                           
+                         db_file
+  . delete( n ) - sterge din baza de date persoana cu numele n
+  . modif( n ) - permite modificarea informatiilor asociate cu o
+                   persoana avind numele n  

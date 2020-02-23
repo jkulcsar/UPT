@@ -1,0 +1,80 @@
+
+			LABORATOR 3
+			-----------
+									
+
+
+FUNCTII INLINE
+
+	Combina avantajele macrodefinitiilor cu cele ale functiilor.
+Se declara ca o functie si se comporta ca o macrodefinitie. O functie
+devine macrodefinitie prin plasarea cuvintului "inline" inaintea
+numelui functiei astfel:
+
+inline functie(parametri)
+{
+ ...
+}
+
+	Funtiile "inline" sunt eficiente in cazurile in care transmiterea
+parametrilor prin stiva (operatie lenta) este mai costisitoare (ca timp de
+executie) decit efectuarea operatiilor din corpul functiei.
+
+Exemplu:
+class coordonate_3D
+{
+	int X,Y,Z;
+
+// prin definirea metodei in interiorul declararii clasei,
+// functia membru devine implicit "inline" !!
+
+	void translateaza(int TX, int TY, int TZ)
+	{
+		X+=TX;
+		Y+=TY;
+		Z+=TZ;
+	}
+	void tipareste(void);	// declararea unei metode
+};
+
+// Prefixarea definitiei metodei cu cuvintul cheie "inline" este
+// echivalenta cu definirea functiei membru in cadrul declaratiei clasei
+
+inline void coordonate_3D::tipareste(void)
+{
+	cout << "\n\tX=" << X << "\tY=" << Y << "\tZ=" << Z << "\n";
+}
+
+	Deoarece procedura "translateaza" va fi de tip inline, ea nu va fi apelata
+ci expandata in locul fiecarui apel.
+	Definirea unei functii in cadrul unei clase se mai numeste si declarare
+inline implicita. In cazul metodei "tipareste" este vorba de o declarare
+explicita, aceasta metoda fiind doar declarata in cadrul clasei, iar in locul
+unde este definita va fi prefixata cu cuvintul cheie "inline".
+	Procedurile ce nu sint membru al unei clase nu pot fi declarate "inline"
+decit explicit.
+	Este interzisa folosirea in cadrul functiilor "inline" a structurilor
+repetitive de control ("for", "while", "do while").
+
+
+MEMBRII STATICI
+
+	Principala utilizare a variabilelor membru statice consta in eliminarea
+cit mai multor variabile globale ale unui program.
+	Cuvintul cheie "static" poate fi utilizat in prefixarea membrilor unei
+clase. Odata declarat "static", membrul in cauza va avea proprietati diferite,
+datorita faptului ca MEMBRII STATICI NU APARTIN UNUI OBIECT ANUME, ci sunt
+COMUNI tuturor instantierilor unei clase.
+	Pentru o variabila membru statica se rezerva o singura zona de memorie,
+COMUNA TUTUROR INSTANTIERILOR CLASEI.
+	Variabilele membru statice pot fi prefixate doar de numele clasei urmat
+de "::".
+	Apelul metodelor statice se face exact ca si accesarea variabilelor membru
+statice. Deoarece metodele statice nu sint apelate de un obiect anume, nu li
+se va transmite parametrul ascuns "this". Daca intr-o metoda statica dorim sa
+operam cu variabile membru nestatice, va fi nevoie sa furnizam un parametru
+explicit de genul obiect, pointer la obiect sau referinta la obiect.
+	Toti membrii statici sunt doar declarati in cadrul clasei, ei urmind a fi
+obligatoriu initializati.
+
+// vezi ex_lab3.cpp

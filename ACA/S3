@@ -1,0 +1,16 @@
+sirc	ds.b  'sir in  C'
+	ds.b  0
+n	equ 5
+prog    move.w #0,D1
+	move.w #0,D0
+	lea sirc,A0
+	move.b #n,D1
+	subq.b #1,D1
+et	move.b (A0)+,D0
+	tst D0
+	beq et1
+	trap #15
+	ds.w 16
+	dbf.b D1,et
+et1	trap #15
+	dc.w 0	

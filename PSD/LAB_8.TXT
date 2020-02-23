@@ -1,0 +1,112 @@
+Programarea Sistemelor de Conducere Distribuita
+
+			LABORATOR 8
+
+                Transmiterea mesajelor la utilizatori si grupuri
+
+        Transmiterea mesajelor catre utilizatori si grupuri se face cu comanda
+SEND. Mesajul va fi afisat in partea de jos a ecranului si sistemul ramane in
+stare de asteptare pana la apsarea tastelor Ctrl-Enter. Pe langa mesaj se mai
+afiseaza si utilizatorul si numarul statiei care a trimis mesajul. Mesajele
+pot avea 44 de caractere minus numele utilizatorului care trimite mesajul.
+        Sintaxa comenzii este:
+
+        SEND "mesaj" TO USER nume_utilizator
+
+        SEND "mesaj" TO GROUP nume_grup
+
+        La apasarea tastelor Ctrl-Enter mesajul va fi sters de pe ecran si nu
+poate fi reafisat. Daca au fost transmise mai multe mesaje, ele vor fi afisate
+pe rand. Mesajele pot fi transmise doar utilizatorilor ca sunt conectati in
+retea in momentul transmiterii lor. Utilizatorii care lucreaza in mod grafic
+in momentul transmiterii mesajelor nu le vor receptiona.
+
+
+                Transmiterea mesajelor la consola
+
+        Sintaxa comenzii este:
+
+ 
+        SEND "mesaj" TO CONSOLE
+
+Mesajul va fi afisat pe ecranul consolei. El nu trebuie sters ca cele
+transmise la o statie.
+
+
+                Transmiterea mesajelor cu FCONSOLE
+
+        Se parcurg urmatorii pasi:
+1. se lanseaza FCONSOLE
+2. se selecteaza optiunea "Broadcast Console Message"
+3. se introduce mesajul care va fi transmis. Mesajul va fi afisat.
+4. se apasa Ctrl-Enter
+5. se paraseste FCONSOLE
+
+
+                Activarea/dezactivarea afisarii mesajelor
+
+        Daca mesajul a aparut pe o statie, lucrul pe acea statie poate fi
+continuat numai dupa apasarea tastelor Ctrl-Enter. Pentru a bloca
+receptionarea mesajelor pe parcursul rularii unor programe mai lungi, se
+dezactiveaza receptionarea lor cu comanda CASTOFF. Comanda nu dezactiveaza
+receptionarea mesajelor de la FCONSOLE. Pentru a le dezactiva si pe acestea se
+foloseste comanda CASTOFF ALL. Activarea receptionarii se face cu comanda
+CASTON. 
+
+
+        
+
+
+
+
+                CONFIGURAREA STATIILOR DE LUCRU            
+
+
+        DOS administreaza o parte de memorie in care sunt stocate informatii
+necesare DOS-ului si aplicatiilor. Aceste informatii pot fi accesate si de
+retea.
+        Una din informatii stocate este PATH, adica lista de directoare in
+care este cautata o comanda introdusa de utilizator. Alta informatie este
+COMSPEC care specifica locul unde se gaseste programul care va interpreta
+comenzile. Alte informatii pot fi plasate de utilizatori sau de programe.
+        Initial, zona de memorie poate fi de la 160 octeti pana la 256 octeti.
+Ea poate fi marita  printr-o comanda SHELL utilizata in fisierul CONFIG.SYS.
+
+CONFIG.SYS
+
+        Primul lucru care il face DOS cand se porneste o statie de lucru este
+sa caute fisierul CONFIG.SYS. Acest fisier poate contine comenzi referitoare
+la configurarea statiei de lucru. In general CONFIG.SYS este plasat in radacina
+drive-ului de resetare. De obicei fisierul CONFIG.SYS contine urmatoarele
+linii:
+
+        FILES=20
+
+        BUFFERS=20
+
+FILES - specifica numarul de fisiere ce pot fi deschise simultan. Implicit
+este 8.
+BUFFERS - DOS poate stoca 20512 octeti de buffer-e in memoria RAM. Cand DOS
+citeste sau scrie un fisier, el este stocat si in aceste buffer-e. Cand se
+doreste citirea unei date, ea este cautata intai in aceste buffer-e, unde
+accesul este mai rapid decat pe disc. 
+        Alte comenzi care se pot gasi in CONFIG.SYS sunt:
+
+DEVICE=  incarca driver-e de dispozitive (utilizate frecvent in instalarea
+administratorilor de memorie), HIMEM.SYS, SMARTDRV.SYS
+LASTDRIVE=  informeaza DOS-ul de numarul de unitati de disc existente, de
+obicei de la A: la E:
+
+        Ultimul lucru efectuat de DOS este cautarea fisierului AUTOEXEC.BAT. 
+
+
+IPX.COM(Internetwork Packet Exchange)
+
+        Fisierul IPX.COM determina comunicarea intre programele de pe statii
+si server. Are urmatoarele functii:
+- asigura comunicarea programelor de pe statii cu placa de retea a server-ului
+- asigura comunicarea placii de retea a statiei cu server-ul. Permite
+utilizarea protocoalelor de comunicare IPX si SPX(Sequenced Package Exchange)
+Un protocol de comunicare este format dintr-un set de reguli de transmitere a
+datelor. Aceste reguli asigura siguranta transmiterii datelor.
+

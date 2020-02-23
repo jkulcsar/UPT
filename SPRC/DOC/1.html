@@ -1,0 +1,126 @@
+<HTML>
+<HEAD>
+<TITLE> SPRC/UNIX, Laborator U1</TITLE>
+</HEAD>
+<BODY>
+<center><H1> SPRC/UNIX: Laborator U1 </H1></center>
+<hr>
+<center><h1> Programarea in retele UNIX: sockets</h1> </center>
+<hr>                       
+<h3> Introducere </h3>
+<p>
+ Primul concept care trebuie precizat este cel de <strong>protocol</strong>, 
+care, intr-un mod neformal, se poate 
+defini ca un set de reguli care trebuie urmate de doua calculatoare care se afla in comunicare in scopul schimbarii de date.
+ Conceptul de sockets se bazeaza pe notiunea de <strong>asociere</strong>. Prin asociere se intelege urmatorul cvintuplu:
+<br><br>
+<center>{protocol, adresa locala, port local, adresa indepartata, port 
+indepartat}</center> <br> <br>
+Un <strong>socket</strong> (priza, soclu) este reprezentat de urmatorul triplet:
+<br> <br>
+<center> {protocol, adresa, port} </center>
+<br>
+ Se poate observa ca prin asociere se intelege conectarea a doi sockets, dar, atentie, cei doi sockets trebuie sa fie de acelasi protocol.
+<br>
+<h3> Familia de protocoale TCP/IP </h3>
+<p>
+ Cea mai intalnita familie de protocoale in mediul UNIX este TCP/IP, care de fapt are mai multi membrii decat doi si anume: ARP, RARP, ICMP, UDP, etc. O adresa in aceasta familie se reprezinta pe patru octeti iar un port pe doi octeti. 
+ Descriere structurilor de date folosite pentru programarea cu sockets din aceasta familie se gasesc in urmatoarele fisiere <code> header</code>:
+<br>
+<pre>
+ /usr/include/sys/socket.h
+ /usr/include/netinet/in.h
+ /usr/include/arpa/inet.h
+</pre>
+ Programarea in retea cu <code>sockets</code> se face folosind apelurile 
+sistem ce apar in secventele de cod de mai jos.
+
+<br><br>
+<h3> Paradigma client-server</h3>                        
+<p>
+Prin <strong> paradigma client-server</strong> se intelege un mod de abordare a rezolvarii aplicatiilor distribuite astfel incat solutia cuprinde o colectie de programe care se pot impartii in doua clase. <strong> Serverul</strong>, de obicei unul, este 
+programul care este interogat de alte programe si in urma interogarii executa diverse actiuni. Este partea cea mai sofisticata a aplicatiei distribuite. <strong> Clientul</strong>, unul sau mai multi, reprezinta programe, in general cu un nivel scazut de 
+
+
+complexitate, care in principal reprezinta o interfata intre utilizator 
+si server. Rolul programelor client este de prelua cererile 
+utilizatorului (in modul cel mai evoluat se foloseste o interfata grafica) si de a le transmite serverului, dupa procesarea lor transmitand utilizatorului rezultatele.
+<br>
+<br>
+<h3> Scenarii de server</h3>
+<p>
+ In continuare se prezinta doua scenarii de server, clasice in cazul aplicatii distribuite construite cu <code>sockets</code>. <br>
+ Prin <strong>server iterativ</strong> se intelege un server care proceseaza cate o cerere la un moment dat. Daca viteza de sosire a cererilor este mai mare decat viteza de procesare atunci cererile noi sosite se stocheaza intr-o coada de asteptare. Scena
+
+riul acestui server este dat mai jos:
+<br> 
+<pre>
+int sockfd, newsockfd;
+if ((sockfd=socket(...)) &lt; 0)
+ { printf ("error ..."); exit(1);}
+if (bind(sockfd,...) &lt; 0)
+ { printf ("error ..."); exit(1);}
+if (listen(sockfd,5) &lt; 0)
+ { printf ("error ..."); exit(1);}
+for (;;)
+ newsockfd=accept(sockfd, ...); /* blocare pentru asteptare cereri*/
+ if (newsockfd &lt; 0) 
+   { printf ("error ..."); exit(1);}
+ process(newsockfd); /*procesare cerere*/
+ close (newsockfd);
+}
+</pre>
+In cazul <strong> serverului concurent</strong> scenariul este diferit, eliminandu-se pierderea de cereri asa cum se poate intampla in cazul scenariului de mai sus. In acest caz serverul creaza un fiu pentru fiecare cerere primita. Transfera executia cere
+
+rii la fiu si serverul se intoarce la procesarea urmatoarei cereri.
+<pre>
+
+int sockfd, newsockfd;
+
+if ((sockfd=socket(...)) &lt; 0)
+  { printf ("error ..."); exit(1);}
+if (bind(sockfd,...) &lt; 0)
+ { printf ("error ..."); exit(1);}
+if (listen(sockfd,5) &lt; 0)
+ { printf ("error ..."); exit(1);}
+for (;;)
+ newsockfd=accept(sockfd, ...); /* blocare pentru asteptare cereri*/
+ if (newsockfd &lt; 0) 
+   { printf ("error ..."); exit(1);}
+ if (fork()==0) {  /* procesul fiu */
+   close(sockfd);
+   process(newsockfd); /*procesare cerere*/
+   exit(0);
+  }
+ close (newsockfd);  /* parinte */
+}
+
+</pre>
+
+<h3> Mersul Lucrarii</h3>
+<p>
+ 1. Studiati structurile de date din fisierele enuntate mai sus, precum 
+si apelurile de sistem. In ultimul caz se foloseste comanda 
+<code>man</code>. <br> 
+ 2.  La adresa <a 
+href="http://www.cs.utt.ro/~romeo/LABS/SPRC/TCP/">
+<code>
+http://www.cs.utt.ro/~romeo/LABS/SPRC/TCP/
+</code></a> se 
+gasesc urmatoarele fisiere
+<code>tcpcli.c</code>, <code>tcpserv.c</code>, <code>strecho.c</code>, si <code> strcli.c</code> si <code>inet.h</code>.Se creaza doua executabile un client si un server din aceste surse, pentru aceasta se fac urmatoarele modificari:<br>
+ - se modifica corespunzator fisierul <code> Makefile</code><br>
+ - se alege statia pe care va rula serverul si se introduce adresa ei in <code>inet.h</code>. Portul se alege dupa un algoritm simplu: studentul cel mai din stanga (dreapta) alege numarul 6000, si in ordine se aloca apoi 6099, 6199, etc.<br>
+ - se creaza executabile pentru cele doua fisiere <br>
+ - se intra in sesiune la distanta pe masina desemnata pentru server si se lanseaza serverul in background, apoi se lanseaza clientul pe masina curenta. Trebuie sa se observer o conectare in retea si transfer de date.<br>
+
+<br>
+Se va studia modul de realizare a comunicarii prin program folosind sockets.
+<br>
+Ce se intimpla cind mai multi clienti contacteaza acelasi server? 
+(Utilizati comanda: <code>ps</code>). Dar dupa ce un client s-a 
+terminat? Imbunatatiti cele 2 programe.<br>
+Incercati sa conectati severul prin sesiune <code>telnet</code> pe portul 
+ales. 
+ </body>
+

@@ -1,0 +1,28 @@
+Sa se creeze o lista simplu inlantuita, ca si o clasa, membrii sai privati
+fiind pointerii de inceput si de sfirsit ai listei, ale caror noduri au
+urmatoarea structura:
+
+typedef struct elem_list
+{
+	char sir[20];
+	struct elem_list *next;
+}elem_list;	
+
+class lista
+{
+	elem_list *cap, *coada;
+public:
+	lista();  //constructor
+	insert_in_list(char *);
+	delete_last_item();
+	~lista(); //destructor
+}
+Functia insert_in_list() va insera un element la sfirsitul listei, iar
+functia delete_last_item() va sterge ultimul element al listei.
+Se va declara apoi o functie "friend" a clasei "lista" care sa afiseze
+continutul intregii liste.
+Obs:
+-constructorul clasei trebuie sa seteze pe NULL pointerii "cap" si coada";
+-destructorul clasei trebuie sa elibereze intreaga lista;
+-prin definirea mai multor obiecte de tip "lista" avem posibilitatea 
+creerii mai multor liste independente.

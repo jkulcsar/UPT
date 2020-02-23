@@ -1,0 +1,342 @@
+
+		LUCRAREA 7:  OPERATII CU POINTERI
+
+A. Consideratii teoretice
+
+	Una dintre caracteristicile de baza ale limbajului C este posibilitatea de a lucra, prin intermediul pointerilor, cu adrese de date si de functii, inclusiv de a efectua operatii aritmetice si comparatii. Aceste caracteristici sunt rezervate, ån general, limbajelor de asamblare; ånglobandu-le, ånsa, åntr-un limbaj de nivel ånalt, aceste operatii pot fi efectuate ån cadrul unor programe portabile, independente de structura hardware a calculatorului.
+
+	Utilizarea pointerilor se impune uneori ca unica alternativa posibila; alteori, ei conduc la un cod mai compact si mai eficient decåt alte metode. Pointerii se folosesc ån C cu precadere ån urmatorele trei situatii:
+
+	- transmiterea de rezultate prin intermediul parametrilor functiilor;
+	- accesarea elementelor tablourilor;
+	- descrierea si accesarea structurilor de date dinamice.
+
+	Pe langa pointerii de date care contin adresa unei variabile sau constante, mai exista o a doua categorie - pointerii de functii care contin adresa codului executabil al unei functii.
+
+	Vom exemplifica, ån sectiunea urmatoare, utilizarea pointerilor de date si de functii  ån diferite situatii.
+
+
+B. Exemple 
+
+	1. Sa se scrie un program care afiseaza meniul de la exemplul din lucrarea 5, utilizand ån acest scop cate o functie distincta pentru fiecare optiune. Apelarea acestora se face indirect, prin intermediul unui tablou de pointeri, corespunzatori adreselor functiilor.	
+
+
+#include <stdio.h>
+
+typedef void (*pfunc) (); /* pointer la o functie de tipul
+                           void,fara parametrii */
+
+void ad(void){
+  puts ("\n adauga student");
+}
+
+void mod(void){
+  puts ("\n modifica date student");
+}
+
+void list(void){
+  puts ("\n listeaza datele tuturor studentilor");
+}
+
+void term(void){
+  puts ("\n terminare program");
+}
+
+pfunc tab[]={ad,mod,list,term};
+
+void meniu(void){
+   int i=0;
+   for (; i<4; i++)
+      (*tab[i])();
+ }
+
+ void main(void){
+   meniu();
+
+ }
+
+
+	2. Sa se scrie un program care gestioneaza date despre un grup de studenti. Pentru fiecare student se memoreaza numele si numarul sau matricol. Programul trebuie sa implementeze urmatoarele operatii:
+	- citirea  numarului de studenti si a datelor acestora;
+	- afisarea  datelor tuturor studentilor;
+	- sortarea listei de studenti ån ordinea alfabetica a numelor;
+	- sortarea listei de studenti ån ordinea crescatoare a numerelor matricole;
+	- cautarea unui student pentru care se precizeaza numele si afisarea pozitiei pe care o ocupa acesta ån lista ordonata alfabetic dupa numele studentilor;
+	- cautarea unui student pentru care se precizeaza numarul matricol si afisarea pozitiei pe care o ocupa acesta ån lista ordonata crescator dupa numarul matricol al studentilor;
+
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <conio.h>
+
+typedef struct{
+      char *nume;
+      int nr;
+   }student;
+
+#define SIZE sizeof(student)
+
+typedef int (*comp)(void*, void*); /*tip pointer la functia
+                                   de comparare*/
+typedef student * pstud;
+
+ /*--------------------------------------------------------*/
+ /*                                                        */
+ /* functia eroare afiseaza un mesaj de eroare,in          */
+ /* cazul in care nu poate fi alocata dinamic o zona       */
+ /* de memorie; apoi se opreste executia programului       */
+ /*                                                        */
+ /*--------------------------------------------------------*/
+
+
+ void eroare(void){
+    puts(" \n **** eroare alocare dinamica de memorie ****");
+    exit(1);
+ }
+
+ /*--------------------------------------------------------*/
+ /*                                                        */
+ /* citeste numarul de studenti si datele acestora,        */
+ /* aloca dinamic spatiu pentru tabloul de studenti,       */
+ /* memoreaza numele si nr. matricol ale studentilor       */
+ /*                                                        */
+ /*--------------------------------------------------------*/
+ 
+ void citeste(int *n, pstud *tab){
+    pstud t;
+    char sir[40];
+    int i;
+
+    /* citeste numarul de studenti */
+    printf("\n dati numarul de studenti:");
+    scanf("%d", n);
+
+     /*aloca spatiu pentru toate inregistrarile de tip 
+     student */
+    if(!(t=(pstud)malloc ((*n)*SIZE))) /*citeste1*/
+       eroare();
+    *tab=t;
+    /* citeste datele tuturor studentilor */
+    for(i=0;i< *n; i++,t++) {
+        printf("\n nume: ");
+        scanf("%s", sir);
+        /*aloca dinamic spatiu pentru numele studentului */
+        if(!(t->nume=(char*)malloc(strlen(sir)+1)))
+               /*citeste2*/
+            eroare();
+        strcpy(t->nume,sir);
+        printf("\n numar matricol:");
+        scanf("%d", &t->nr);
+     }
+   }
+ /*--------------------------------------------------------*/
+ /*                                                        */
+ /* afiseaza numele si numarul matricol ale celor          */
+ /* n studenti din tabelul a carui adresa este data        */
+ /* in parametrul tab                                      */
+ /*                                                        */
+ /*--------------------------------------------------------*/
+
+ void afiseaza (int n, pstud tab){
+ int i;
+
+ puts("\n tabelul cu studenti ");
+ for(i=0; i<n; i++, tab++)
+    printf("\n%-30s %4d", tab->nume, tab->nr);
+ }
+
+ /*--------------------------------------------------------*/
+ /*                                                        */
+ /* functia comp1 compara numele a doi studenti ale caror  */
+ /* adrese sunt date de pointerii p si r                   */
+ /*                                                        */
+ /*--------------------------------------------------------*/
+
+ int comp1 (void *p, void *r){
+
+   return strcmp (((pstud)p)->nume, ((pstud)r)->nume);
+ 
+}
+
+ /*--------------------------------------------------------*/
+ /*                                                        */
+ /* functia comp2 compara nr.matricol a doi studenti ale   */
+ /* caror adrese sunt date de pointerii p si r             */
+ /*                                                        */
+ /*--------------------------------------------------------*/
+ 
+int comp2 (void *p, void *r){
+
+   return (((pstud)p)->nr - ((pstud)r)->nr);
+
+ }
+
+
+ /*--------------------------------------------------------*/
+ /*                                                        */
+ /* functia cauta studentul cu adresa data de parametrul s */
+ /* in tabelul cu adresa indicata de parametrul tab;       */
+ /* tabelul este ordonat dupa criteriul specificat prin    */
+ /*  parametrul f                                          */
+ /*                                                        */
+ /*--------------------------------------------------------*/
+ 
+void cauta (pstud s, pstud tab,int n, comp f){
+ pstud t=NULL;
+ int i;
+
+ t=bsearch((void*)s,(void *)tab,n, SIZE,f);
+ if(t){
+            /* exista studentul cautat */
+            i=t-tab;
+            printf ("\n studentul %s cu numarul matricol %d e al %d -lea in evidenta", t->nume,t->nr,i+1);
+          }
+   else
+             printf("\n studentul nu se afla in evidenta");
+  }
+
+
+ /*--------------------------------------------------------*/
+ /*                                                        */
+ /* elibereaza spatiul de memorie detinut de cimpurile nume*/
+ /* ale  celor n studenti din tabel si apoi zona detinuta  */
+ /* de tabel                                               */
+ /*                                                        */
+ /*--------------------------------------------------------*/
+
+ void elibereaza(pstud tabel,int n){
+  int i;
+
+  for(i=0; i<n; i++)
+    free(tabel[i].nume);
+  free(tabel);
+ }
+
+ /*--------------------------------------------------------*/
+ /*                                                        */
+ /* functia meniu  afiseaza meniul programului             */
+ /*                                                        */
+ /*--------------------------------------------------------*/
+
+ void meniu(void){
+   puts("\n c, C --- citeste tabel studenti");
+   puts(" a, A --- afiseaza tabel studenti");
+   puts(" n, N --- ordoneaza dupa nume");
+   puts(" r, R --- ordoneaza dupa numar matricol");
+   puts(" f, F --- cauta dupa nume");
+   puts(" l, L --- cauta dupa numar matricol");
+   puts(" x, X --- iesire din program");
+ }
+
+
+ void main(void){
+
+  char opt;
+  int n;     /* numarul de studenti */
+  char nume[30];
+  student s;
+  pstud tabel=NULL; /* adresa tabloului cu studenti */
+
+
+ while(1){
+   meniu();
+   opt=tolower(getche());
+   switch(opt){
+     case 'c': if(tabel) /* daca a existat anterior un alt 
+                          tablou in memorie */
+                    elibereaza(tabel,n);
+               citeste(&n, &tabel);
+               break;
+     case 'a': afiseaza(n,tabel);
+               break;
+     case 'n': qsort((void*)tabel, n, SIZE, comp1);
+               break;
+     case 'r': qsort((void*)tabel, n, SIZE, comp2);
+               break;
+     case 'f': printf("\n dati numele:");
+               scanf("%s", nume);
+               if(!(s.nume=(char *)malloc (strlen(nume)+1)))
+                   eroare();
+               strcpy(s.nume,nume);
+               cauta(&s,tabel,n,comp1);
+               free(s.nume);  /*elibereaza spatiul alocat 
+                               pentru nume */
+               break;
+     case 'l': printf("\n dati numarul matricol:");
+               scanf("%d", &s.nr);
+               cauta(&s,tabel,n,comp2);
+               break;
+     case 'x': exit(0);
+     default:  puts("comanda gresita");
+   }
+ }
+}
+
+
+
+
+Observatii:
+
+	1. Din considerente de economie de memorie, implementarea tabloului cu studenti s-a facut dinamic; dupa ce s-a citit numarul de studenti, s-a alocat spatiul corespunzator (vezi linia /*citeste1*/). In plus, ån tablou, ån campul nume se pastreaza nu sirul de caractere pentru numele studentilor, ci un pointer la sirul de caractere. Astfel, ån loc de a rezerva, pentru toate numele, acelasi numar de caractere, ån momentul ån care se cunoaste exact numele unui student, se aloca dinamic un spatiu de memorie de dimensiune egala cu lungimea acestuia (vezi linia /*citeste2*/). Adresa acestui spatiu se pastreza ån campul nume.
+
+	2. Reamintim ca ån limbajul C, mecanismul de transmitere a parametrilor este prin valoare. Prin urmare, o functie nu poate modifica valoarea unui parametru actual, chiar daca modifica parametrul formal corespondent. Pentru situatiile ån care se doreste sa se transmita informatie de la functia apelata la cea apelanta prin intermediul parametrilor se procedeaza ån felul urmator: la apelul functiei se transmite adresa obiectului care urmeaza sa se modifice, iar, ån cadrul functiei, parametrul corespondent se declara de tipul pointer. Astfel, functia apelata cunoaste adresa obiectului respectiv si ål poate modifica, operand indirect asupra lui, prin intermediul pointerului. 
+	Din aceste considerente, deoarece citirea numarului de studenti si alocarea spatiului pentru tablou se face ån functia citeste, parametrii formali corespunzatori int *n si pstud *tab vor fi de tipul pointer. La apelul functiei citeste se vor transmite nu valorile lui n si tabel, ci adresele acestora: &n, &tabel.
+
+	3. La accesarea elementelor tabloului de studenti s-a folosit atat lucrul cu pointeri ån functiile citeste si afiseaza, cat si varianta cu indici ån functia elibereaza.
+
+	4. Pentru compararea, dupa nume, a doi studenti s-a implementat functia comp1. Similar, functia comp2 realizeaza compararea dupa numarul matricol.
+
+	5. Pentru sortarea tabloului se apeleaza functia de biblioteca qsort. Aceasta are urmatorul prototip:
+void qsort  (void *tab, int nr_elem, int nr_oct_elem, int (*fcmp)(void *, void *));
+
+Parametrii indica adresa tabloului de sortat, numarul elementelor tabloului, marimea ån octeti a fiecarui element si adresa functiei de comparare.
+
+	6. Dupa sortarea tabloului, cautarea unui student se face cu functia de cautare binara bsearch:
+
+void *bsearch ( void *cheie,  void *tab, int   nr_elem, int  nr_octeti_elem, int (*fcmp)(void *,void *));
+
+Parametrii indica cheia cautata, adresa tabloului, numarul elementelor tabloului, marimea ån octeti a fiecarui element si adresa functiei de comparare. Functia returneaza adresa primului element care corespunde cheii, respectiv valoarea NULL daca nu exista un astfel de element.
+
+	7. In functia cauta, pentru a afla numarul de ordine al unui student ån tabela, se scade din adresa elementului de tablou corespunzator acestuia (t), adresa de ånceput a tabelei (tab).
+ 
+	8. Pentru ca programul sa functioneze corect, comenzile f si l trebuie date dupa ce ån prealabil s-au dat comenzile n si, respectiv, r. (Se utilizeaza pentru cautarea unui student o functie de cautare binara, deci tabela trebuie sa fie anterior sortata!)
+
+C. Probleme propuse
+
+	1. Precizati ce va afisa urmatorul program; verificati-va ruland programul.
+
+#include <stdio.h>
+
+void main(void){
+ int t[4] = {0,1,2,3};
+ int *p=&t[1];
+
+ printf ("%d\n", *p++);
+ printf ("%d\n", *++p);
+ printf ("%d\n", ++*p);
+}
+
+	2. Cunoscand ca sizeof (char) este 1, sizeof (int) este 2 si sizeof (float) este 4, determinati care sunt valorile obtinute prin atribuirile de mai jos:
+
+char *pc;               /* presupunem pc=900 */
+int *pi1, *pi2;         /* presupunem pi1=1000 si pi2=1012 */
+float *pf1, *pf2;       /* presupunem pf1=1100 si pf2=1112 */
+
+pc+=6;
+pi1+=6;
+pf1+=6;
+*pf1=pi1-pi2;
+*pi1=pf1-pf2;
+pi1-=*pi2;
+
+	3. Sa se realizeze un program pentru evidenta abonatilor telefonici dintr-o localitate. Pentru fiecare abonat se memoreaza numele, adresa, numarul de telefon. Programul trebuie sa permita:
+- adaugarea unui nou abonat;
+- stergerea unui abonat;
+- modificarea datelor unui abonat;
+- afisarea numarului de telefon al unui abonat.
+- stergerea åntregii evidente.
+Implementarea listei de abonati sa se faca folosind cat mai putina memorie.
+
+	

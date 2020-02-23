@@ -1,0 +1,107 @@
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="GENERATOR" CONTENT="Mozilla/4.03 [en] (X11; I; Linux 2.0.30 i486) [Netscape]">
+   <TITLE> SPRC/UNIX, Lucrarea 9 de Laborator</TITLE>
+</HEAD>
+<BODY TEXT="#000000" LINK="#0F00FF" VLINK="#A000A0" BACKGROUND="b.gif">
+
+<CENTER>
+<H1>
+SPRC/UNIX: Lucrarea de Laborator Nr. 9</H1></CENTER>
+
+<HR WIDTH="100%">
+<CENTER>
+<H1>
+Paradigma client-server: comunicare in grup</H1></CENTER>
+
+<HR>
+<H3>
+Introducere</H3>
+Prin comunicare in grup se intelege o extindere a cazului clasic de comunicare
+unu la unu la cazurile unul la mai multi si mai multi la unul. O metode
+de implementare a comunicarii in grup este aceea in care se foloseste un
+server de multicast.
+<H3>
+Descriere scenariului aplicatiei</H3>
+Serverul primeste de la un client date si apoi parcurgand o categorie de
+clienti inregistrati pentru acel tip de date trimite datele la fiecare
+pe rand.
+<BR>Conectarea pentru toti clientii este aceeasi, insa imediat dupa conectare
+clientii se identifica din ce categorie fac parte <TT>receiver</TT> sau
+<TT>sender</TT>. Cei din categoria <TT>receiver</TT> se inregistreaza pentru
+anumite tipuri de date. Din acel moment clientul inregistrat se transforma
+intr-o bucla infinita care asteapta date, le prelucreaza si iarasi asteapta
+date. Ceilalti clienti care se inregistreaza in categoria de <TT>sender</TT>
+sunt retinuti de server intr-o anumita structura de date (tablou) aplicand
+pe ei una din functiile oferite de UNIX pentru <A HREF="http://www.utt.ro/~cristi/psoa/l12.html">multiplexarea
+I/E</A>. Se va folosi apelul de sistem <TT>poll()</TT>. Cu alte cuvinte
+serverul asteapta de la <TT>sender</TT>i in apelul <TT>poll()</TT> si cand
+este "trezit" parcurge <TT>sender</TT>ii si pentru fiecare dintre ei care
+au date (cel putin unul trebuie sa aiba pentru ca altfel nu s-ar fi declansat
+<TT>poll</TT>-ul) se identifica tipul datelor si pentru fiecare tip se
+parcurge multimea de <TT>receiver</TT>i si se trimit datele respective.
+<BR>Exemplul concret de o astfel de parcurgere a clientilor <TT>sender</TT>
+este dat mai jos:
+<PRE>/*
+&nbsp;* clientii s-au conectat la accept() si s-au inregistrat
+&nbsp;*/
+for(;;)
+&nbsp;&nbsp;&nbsp; {&nbsp; /*
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * se initializeaza tabloul fdarray cu descriptorii clientilor
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * de tip sender; pentru acesti descriptori se
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * precizeaza ca se astepta un eveniment de citire
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ListSender.restart();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; for(j=0;j &lt; ListSender.getNrElem();j++)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; elem=(INT* )ListSender.next();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; fdarray[j].fd=elem->getInfo();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; fdarray[j].events=POLLIN ;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /*
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * serverul ramine blocat in poll pina la
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * aparitia unor date la unul din descriptorii precizati
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * in fdarray
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; k=poll(fdarray,ListSender.getNrElem(),INFTIM);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; k= ListSender.getNrElem();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /*
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * se parcurge tabloul fdarray si se verifica la
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * care din descriptori a aparut date
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; */&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; for(i=0 ; i &lt; k; i++)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if(fdarray[i].revents==POLLIN)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /*
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * aici se identifica tipul datelor si se face trimiterea
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * printr-o bucla ce parcurge descriptorii de clienti receiver
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; */&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ...
+&nbsp;&nbsp;&nbsp; }</PRE>
+Modul de abordare recomandat este urmatorul:
+<UL>
+<LI>
+se testeaza bucla principala <TT>poll()</TT> local (folosind descriptori
+de pipe).</LI>
+
+<LI>
+se rescrie totul cu sockets</LI>
+
+<LI>
+fiecare client si/sau server se afla pe cate o statie</LI>
+
+<LI>
+sa nu se uite la sfarsit distrugerea programelor</LI>
+</UL>
+
+<H3>
+Mersul Lucrarii</H3>
+Construiti o aplicatie dupa scenariul descris mai sus si apoi folosind
+apelul de sistem <TT>gettimeofday()</TT> calculati cat dureaza o scenariul
+de mai sus in comparatie cu un trasnfer normal prin retea. Incercati pentru
+diverse numere de clienti si diverse marime ale datelor.
+<BR>&nbsp;
+</BODY>
+</HTML>

@@ -1,0 +1,194 @@
+Laborator 4
+
+        Redefinirea operatorului "()" (apel de functie)
+        
+        Redefinirea operatorului "()" (apel de functie)
+ne aduce in situatia de a crea un operator binar
+nestatic de forma:
+
+        expresie(lista de expresii)
+
+        Avantaje:
+        -evaluarea si verificarea listei de argumente
+se face ca la o functie obisnuita;
+        - modul de functionare al mecanismului de apel. 
+Desi operatorul este binar, functia operator poate
+avea oriciti parametri (cel de-al doilea operand fiind
+o lista de argumente). Deoarece lista de parametri
+poate fi vida, inseamna ca al doilea operand poate
+lipsi cu totul.
+
+Exemplu: Implementarea unui iterator (functie de
+parcurgere a unei liste intr-o ordine prestabilita),
+folosind redefinirea operatorului ().
+
+#include<iostream.h>
+#include<process.h>
+struct elem
+{
+ int         nr;
+ struct elem *urm; 
+}
+class list
+{
+ struct elem *cap, *curent;
+ public:
+        list(void)
+         { 
+         cap = NULL;
+         }
+
+        void init(int);
+        struct elem *operator()(void);
+        struct elem *operator()(int);
+};
+void list::init(int)
+{
+ if(n<1)
+  {
+  cout<<"Initializare eronata!\n\n";
+  exit(1);
+  }
+ for(int i=0;i<n;i++)
+  {
+  struct elem *p;
+  p=new elem(i,cap);
+  cap=p;
+  }
+ curent=cap;
+}
+struct elem *list::operator()(void)
+{
+ struct elem *p=curent;
+ curent=curent->urm!=NULL?curent->urm:cap;
+ return p;
+}
+struct elem *list::operator()(int pozitie)
+{
+ curent=cap;
+ for(int i=0;i<pozitie-1;i++)
+  {
+  (*this)();
+  }
+  return (*this)();
+}
+void main(void)
+{
+ list l1();
+ l1.init(4);
+ for(int i=0;i<13;i++)
+  cout<<l1()->nr<<" ";
+ cout<<"\n"<<l1(12)->nr<<"\n";
+ for(int j=0;j<13;j++)
+  cout<<l1()->nr<<" ";
+}
+
+        Redefinirea operatorului "[]" (indexare)
+
+        Operatorul "[]" este binar nestatic. Al doilea
+operand al sau ("indexul") poate fi, practic, de orice
+tip. O linie de program de genul "a[b];" va fi
+interpretata ca "a.operator[](b)".
+
+Exemplu: Se creaza un sir ale carui elemente contin
+informatii legate de cite o persoana (numele si
+greutatea). Se doreste identificarea persoanelor in
+cauza dupa trei criterii bine precizate (nume,
+greutate si numar de ordine in cadrul sirului). In
+acest scop, au fost creati trei operatori de tipul
+"[]", avind indexul de tipul pointer la caracter,
+numar real, respectiv intreg. Toti acesti operatori
+vor cauta in sir elementul descris de valoarea in
+cauza. Daca este gasit, se va returna pointer la el;
+in caz contrar se va returna valoarea NULL.
+
+#include<iostream.h>
+#include<string.h>
+
+class exemplu;
+class persoana
+{
+ char nume[20];
+ double greutate;
+ friend exemplu;
+public:
+ void init(char *p,double g)
+ {
+  greutate=g;
+  strncpy(nume,p,19);
+  nume[19]='\0';
+ }
+ void tip(void)
+ {
+  if(this!=NULL)
+    cout<<"\n\tNume: "<<nume<<" Greutate: "<<greutate;
+  else
+    cout<<"\nElement inexistent!";
+ }
+};
+class exemplu
+{
+ persoana sir[3];
+public:
+ exemplu(void);
+ persoana *operator[](char*);
+ persoana *operator[](double);
+ persoana *operator[](int i)
+ {
+  if(i<3) return &sir[i];
+  else     return NULL;     
+ }
+};
+exemplu::exemplu(void)
+{
+ for(int i=0;i<3;i++)
+  {
+  char n[20] ;
+  double d;
+  cout<<"\nTastati un nume si o greutate: ";
+  cin>>n>>d;
+  sir[i].init(n,d);
+  }
+}
+persoana *exemplu::operator[](char *string)
+{
+ for(int i=0;i<3;i++)
+  if(strcmp(sir[i].nume,string)==0) return &sir[i];
+ return NULL;
+}
+persoana *exemplu::operator[](double greutate)
+{
+ for(int i=0;i<3;i++)
+  if(sir[i].greutate==greutate) return &sir[i];
+ return NULL;
+}
+void main(void)
+{
+ exemplu e;
+ e["Marta"]->tip();
+ e[70.5]->tip();
+ e[0]->tip();
+
+ e["barta"]->tip();
+ e[-23.1]->tip();
+ e[10]->tip();
+}
+
+Probleme propuse:
+1.      Modificati programul anterior astfel incit
+        - lungimea sirului de persoane sa fie variabila
+(setabila printr-un parametru al constructorului);
+        - daca operatorul [] nu gaseste numele sau
+greutatea in cauza, se va crea un nou element avind 
+caracteristica respectiva (adaugat in lista de
+persoane).
+        Se recomanda rezolvarea problemei prin doua
+metode:
+        - utilizind liste inlantuite;
+        - utilizind siruri create dinamic.
+2. 	Completati programul din laboratorul anterior utilizind
+supraincarcarea operatorului [] astfel:
+	- operator[](char *) pentru a gasi acel element din lista 
+al carui sir este specificat ca si parametru;
+	- operator[](int i) pentru a afisa sirul elementului avind
+indicele i in cadrul listei.

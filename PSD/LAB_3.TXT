@@ -1,0 +1,262 @@
+Programarea Sistemelor de Conducere Distribuita
+
+			LABORATOR 3
+
+		Stabilirea drepturilor utilizator
+			   cu SYSCON
+
+	Lista de drepturi care pot fi asignate cu SYSCON este:
+- ACCES CONTROL (A)- permite modificarea drepturilor utilizator a altor
+utilizatori si a mastilor directoarelor/fisierelor. El poate da unele
+drepturi chiar daca el nu le are (exceptand dreptul SUPERVISOR)
+- CREATE (C)- permite crearea unor fisiere/directoare. In plus mai
+permite refacerea fisierelor cu SALVAGE daca acestea au fost sterse 
+- ERASE (E)- permite stergerea fisierelor/directoarelor
+- FILE SCAN (F)- permite afisarea continutului unui director. Fara acest
+drept directorul apare gol
+- MODIFY (M)- permite modificarea atributelor de director si fisier si
+redenumirea lor. Pentru a modifica un fisier este necesar dreptul de
+WRITE
+- READ (R)- permite citirea unor fisiere. Pentru a putea fi rulate
+fisierele trebuie sa poata fi citite
+- WRITE (W)- permite deschiderea si modificarea unui fisier
+- SUPERVISORY (S)- inglobeaza toate drepturile. Utilizatorul care are
+acest drept il poate asigna altor utilizatori
+
+Pentru a asigna drepturi unui utilizator se parcurg urmatorii pasi:
+1. se lanseaza SYSCON
+2. se selecteaza optiunea "User Information" din meniul principal
+3. se selecteaza utilizatorul caruia i se vor asigna sau sterge
+drepturi utilizator
+4. se selecteaza optiunea "Trustee Directory Assignments" pentru
+directoare sau optiunea "Trustee File Assignments" pentru fisiere
+
+5. pentru a asigna drepturi intr-un director care nu exista in lista
+se apasa tasta Ins si apoi se introduce calea completa a directorului
+(nume_server/nume_volum:cale). Aceasta cale se poate construi astfel:
+se apasa tasta Ins inca o data, se alege volumul dorit, se parcurg
+directoarele care duc la directorul dorit.
+6. cand calea este completa se apasa tasta Esc apoi Enter pentru a fi
+inserata in lista de drepturi
+
+5. pentru a modifica lista de drepturi asupra unui director existent
+se selecteaza directorul
+6. se insereaza noi drepturi cu Ins
+7. se sterg drepturi cu tasta Del
+
+		Administrarea drepturilor utilizator
+				cu GRANT
+
+	Comanda poate fi utilizata doar de utilizatorii cu drept de
+ACCES CONTROL. Este mai comoda utilizarea lui GRANT decat a lui FILER
+deoarece accepta utilizarea caracterelor "*" si "?" in specificarea
+cailor care apar in linia de comanda.
+	Lista de drepturi care pot fi asignate cu GRANT este aceeasi
+cu cea specificata la SYSCON.
+	Drepturile trebuie sa fie despartite prin spatiu. 
+
+De exemplu dupa executia urmatoarelor comenzi:
+
+	GRANT R F TO Test
+	GRANT W TO Test
+
+utilizatorul Test va avea drepturile READ, FILE SCAN si WRITE in
+directorul curent. 
+
+	Sintaxa comenzii este:
+
+	GRANT lista_drepturi FOR path TO USER nume_utilizator
+	                                 GROUP nume_grup
+
+lista de drepturi poate contine initialele asociate celor 8 drepturi
+amintite sau urmatoarele:
+ALL - asigneaza toate drepturile
+ALL BUT - asigneaza toate drepturile cu exceptia celor specificate in
+linia de comanda
+ONLY - asigneaza doar drepturile specificate
+NO RIGHTS - se iau toate drepturile
+
+		Listarea drepturilor cu TLIST
+
+	Sintaxa comenzii este:
+
+	TLIST nume_server/nume_volum:path
+
+Se vor afisa drepturile tuturor utilizatorilor si a grupurilor in
+directorul specificat.
+
+		Stergerea drepturilor cu REVOKE si REMOVE
+	
+	Comenzile pot fi folosite doar de utilizatorii care au drept
+de ACCES CONTROL.
+	Diferenta intre cele doua comenzi consta in faptul ca REMOVE
+sterge utilizatorul/grupul din lista de drepturi a directorului
+specificat, pe cand REVOKE nu-i sterge. De obicei REVOKE se foloseste
+cand se sterg doar anumite drepturi. 
+	Sintaxa comenzilor este:
+
+	REVOKE lista_drepturi FOR path FROM USER nume_utilizator
+	                                    GROUP nume_grup
+
+lista_drepturi poate contine aceleasi informatii ca si cele
+specificate la GRANT.
+
+	REMOVE USER nume_utilizator FROM path
+	       GROUP nume_grup
+		
+		Setarea atributelor de fisier cu FLAG
+
+	Pentru a putea folosi aceasta comanda utilizatorul trebuie sa
+aiba drept de MODIFY. 
+	Sintaxa comenzii este:
+
+	FLAG path lista_atribute
+
+path poate fi specificat astfel:
+- nume_server/nume_volum:cale
+- litera asociata caii dorite printr-o comanda MAP anterioara
+- fisierele pot fi specificate cu ajutorul caracterelor "*" sau "?"
+
+lista_atribute poate contine(explicatia lor presupune ca ele sunt
+pozitionate pe ON):
+- READ ONLY (RO)- fisierul poate fi doar citit
+- SHAREABLE (S) - fisierul poate fi folosit de mai multi utilizatori
+simultan
+- TRANSACTIONAL (T) - sistemul de protectie este mai bun
+- INDEXED - permite accesarea fisierelor mai lungi
+- EXECUTE ONLY (X) - permite doar executia fisierului. El nu poate fi
+copiat
+- COPY INHIBIT (CI)- fisierul nu poate fi copiat
+- DELETE INHIBIT (DI)- fisierul nu poate fi sters
+- RENAME INHIBIT (RI)- fisierul nu poate fi redenumit
+- PURGE - daca fisierul a fost sters el nu mai poate fi refacut cu
+SALVAGE
+- ARCHIVE - este folosit de programele de salvare periodica (acestea
+salveaza fisierul pe caseta doar daca acest atribut este pe ON adica
+a fost modificat de la ultima salvare)
+- HIDDEN (H)- fisierul este ascuns
+- SYSTEM (SY)- folosit de fisierele de sistem
+
+	Adaugarea/stergerea atributelor din lista de atribute ale unui 
+fisier se face cu semnul +/-. Atributele se vor grupa. 
+	De exemplu daca se adauga dreptul T si DI si se sterg
+atributele H si P se foloseste comanda:
+
+	FLAG *.exe +T DI -H P
+
+Pentru a sterge toate atributele se foloseste optiunea NORMAL
+
+	FLAG *.com NORMAL
+
+Pentru a seta toate atributele se foloseste optiunea ALL
+
+	FLAG *.com ALL
+
+Pentru a seta si atributele fisierelor din subdirectoarele
+directorului specificat, se foloseste optiunea SUB.
+
+	FLAG *.com +T DI -H P SUB
+
+		Modificarea atributelor directoarelor 
+			    cu FLAGDIR
+
+	Pentru a afisa atributele directorului curent se introduce
+comanda fara nici o optiune:
+
+	FLAGDIR
+
+	Pentru a afisa atributele subdirectoarelor directorului curent se 
+introduce comanda:
+
+	FLAGDIR	*
+
+	Daca se doreste afisarea atributelor unui anumit director se
+introduce in linia de comanda calea care duce la directorul de
+interes. Pentru a afisa atributele directoarelor din radacina se
+foloseste comanda:
+
+	FLAGDIR	SYS:*
+
+	Pentru a seta atributul PURGE al directorului curent se
+introduce comanda (directorul curent se acceseaza cu caracterul "."):
+
+	FLAGDIR	. P
+
+		Determinarea drepturilor efective
+			pe NetWare 3.11
+
+	Pentru a determina drepturile efective intr-un director
+trebuie cunoscute urmatoarele informatii:
+- drepturile utilizator
+- grupurile de care apartine utilizatorul si ce drepturi au aceste
+grupuri
+- masca mostenita de drepturi a tuturor directoarelor din calea
+directorului de interes
+
+	Fie TEST un utilizator care face parte din grupul GRUP si
+EVERYONE si directorul REPORTS la care se ajunge prin calea:
+	
+	SYS:ACCT\BUDGET\OLD\REPORTS
+
+	In continuare se prezinta drepturile efective ale
+utilizatorului TEST si al grupului GRUP la fiecare nivel:
+
+SYS:			IRM			[	      ]
+			drepturile grupului
+			GRUP			[	      ]
+			---------------------------------------
+			drepturi efective
+			GRUP			[	      ]
+			drepturi efective
+			TEST			[	      ]
+---------------------------------------------------------------
+SYS:ACCT		IRM			[R W C E M F A]
+			drepturile grupului
+			GRUP			[R	   F  ]
+			drepturile utiliz.
+			TEST			[    C        ]
+			---------------------------------------
+			drepturi efective
+			GRUP			[R	   F  ]
+			drepturi efective
+			TEST			[R   C	   F  ]
+---------------------------------------------------------------
+SYS:ACCT\BUDGET		IRM			[R         F  ]
+			drepturile grupului
+			GRUP			[R W   E M F  ]
+			---------------------------------------
+			drepturi efective
+			GRUP			[R W   E M F  ]
+			drepturi efective
+			TEST			[R W   E M F  ]
+---------------------------------------------------------------
+SYS:ACCT\BUDGET\OLD	IRM			[R         F  ]
+			drepturile utiliz.
+			TEST			[R   C     F  ]
+			---------------------------------------
+			drepturi efective
+			GRUP			[R         F  ]
+			drepturi efective
+			TEST			[R   C     F  ]
+---------------------------------------------------------------
+SYS:ACCT\BUDGET\	IRM			[             ]
+OLD\REPORTS		drepturile utiliz.
+			TEST			[R W C E M F A]
+			---------------------------------------
+			drepturi efective
+			GRUP			[             ]
+			drepturi efective
+			TEST			[R W C E M F A]
+---------------------------------------------------------------
+
+	Procesul de determinare a drepturior efective este destul de
+complex prin studierea drepturilor si al mastilor. In acest scop
+reteaua pune la dispozitie comanda RIGHTS care afiseaza drepturile
+efective ale utilizatorului curent in directorul curent. Inainte de a
+folosi comanda utilizatorul trebuie sa fie in directorul de interes.
+
+
+
+
+
+

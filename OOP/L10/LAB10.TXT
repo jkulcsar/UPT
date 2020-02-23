@@ -1,0 +1,166 @@
+Laborator 5
+                Operatii cu fisiere
+        Pentru lucrul cu fisiere se utilizeaza obiecte din
+clasele: ofstream, ifstream, fstream, dublu derivate din
+clasele ostream, istream, respectiv iostream si clasa
+specifica fisierelor fstreambase (descendenta din ios).
+
+Exemplu: Concatenarea a doua fisiere: "sursa1" si "sursa2",
+in al treilea fisier, "destinatie".
+
+#include<iostream.h>
+#include<process.h>
+#include<fstream.h> // necesar lucrului cu fisiere
+
+void eroare(char *pt)
+{
+ cerr<<"\n\nEroare la deschiderea fisierului "<<pt;
+ exit(1);
+}
+
+void copy(ofstream& destinatie, ifstream& sursa)
+{
+ char c;
+
+ while(destinatie && sursa.get(c))
+        destinatie.put(c);
+}
+
+void main(void)
+{
+ char sursa1[14], sursa2[14],destinatie[14];
+ ifstream s1,s2;
+ ofstream dst;
+
+ cout<<"\nIntroduceti numele celor trei fisire: "
+        <<"\nDestinatie Sursa1 Sursa2\n\n";
+ cin.read(destinatie,13);
+ cin.read(sursa1,13);
+ cin.read(sursa2,13);
+ destinatie[13]=sursa1[13]=sursa2[13]='\0';
+ s1.open(sursa1,ios::nocreate);
+ if(!s1) eroare(sursa1);
+ s2.open(sursa2,ios::nocreate);
+ if(!s2) eroare(sursa2);
+ dst.open(destinatie);
+ if(!dst) eroare(destinatie); 
+                //s-a utilizat operatorul redefinit "!" 
+ copy(dst,s1);
+ copy(dst,s2);
+ s1.close();
+ s2.close();
+ dst.close();
+}
+
+        Precizari:
+- odata cu realizarea/desfacerea legaturii stream-fisier,
+metodele open si close efectueaza si deschiderea (implicit
+in mod text, respectiv inchiderea fisierelor in cauza.
+- in caz de eroare la deschiderea unui fisier, se va seta
+indicatorul de eroare al stream-ului respectiv.
+- fisierul odata inchis, stream-ului i se va putea atasa un
+alt fisier de lucru. Astfel, secventa urmatoare este
+corecta:
+        //...
+        dst.close();
+        dst.open(alta_destinatie);
+        //...
+- daca este cazul, metoda open() poate fi foarte usor 
+evitata gratie unui mecanism ce permite specificarea
+numelui fisierului ca parametru al constructorului
+stream-ului. Exprimarea:
+        ofstream dst(destinatie);
+este echivalenta cu:
+        ofstream dst;
+        dst.open(destinatie);
+
+        Declaratia metodei open in clasele istream si
+ofstream este cvasi-identica:
+
+void open(char *, int=ios::out, int=filebuf::openprot); 
+// ofstream
+void open(char *, int=ios::in,  int=filebuf::openprot); 
+// ifstream
+
+        Primul parametru reprezinta un pointer la numele
+fisierului, iar al doilea parametru este o valoare ce
+specifica modul de deschidere al fisierului. Lista tuturor
+valorilor posibile pentru al doilea parametru este definita
+in clasa ios sub forma:
+
+class ios
+{
+//...
+public:
+        enum open_mode{
+            in          = 0x01, //fisier de intrare
+            out         = 0x02, //fisier de iesire
+            ate         = 0x04, //dupa deschidere, pozitia
+                                //curenta va fi chiar 
+                                //sfirsitul fisierului 
+            app         = 0x08, //deschis pentru adaugare 
+            trunc       = 0x10, //daca fisierul exista, ii
+                                //sterge continutul (optiune
+                                //implicita daca este vorba 
+                                //de un fisier de iesire si 
+                                //nu apare una din optiunile 
+                                //ios::app sau ios::ate)
+            nocreate    = 0x20, //daca fisierul nu exista
+                                //se semnalizeaza eroare
+            noreplace   = 0x40, //deschiderea esueaza daca
+                                //fisierul exista
+            binary      = 0x80  //deschidere in mod binar
+        };
+//...
+};
+
+        Sint permise inlantuirile specificatorilor de
+deschidere prin sau logic la nivel de bit:
+        ifstream f1("nume", ios::in | ios::nocreate);
+//deschidea pentru citire a fisierului nume; esec daca
+fisierul nu exista. 
+
+        Clasa fstream permite crearea unor strem-uri ce
+suporta atit operatii de intrare, cit si de iesire.
+
+Exemplu:
+  fstream my_stream("filename.ext",ios::in | ios::out);
+  streampos pozitie_citire, pozitie_scriere;
+  char c='b';
+  //...
+  pozitie_scriere = my_stream.tellp();
+  my_stream.seekp(7,ios::beg);
+  my_stream<<c;
+  my_stream.seekp(14,ios::cur);
+  my_stream<<c;
+  //...
+  pozitie_citire = my_stream.tellg();
+  my_stream.seekg(-9,ios::end);
+  my_stream>>c;
+
+        Functiile membru: 
+- tellp si tellg returneaza pozitia curenta de scriere, 
+respectiv de citire in/din stream.
+- seekp si seekg modifica pozitia curenta de scriere/citire
+din stream. Au ca prim argument un intreg ce specifica 
+numarul de caractere cu care se va modifica pozitia relativ 
+la al doilea parametru (reperul fata de care se va efectua
+modificarea). Valorile pentru al doilea parametru sint
+definite in clasa ios:
+
+class ios
+{
+//...
+public:
+ enum seek_dir
+ {
+  beg = 0,      //inceput de fisier
+  cur = 1,      //pozitia curenta in fisier
+  end = 2       //sfirsit de fisier
+ };
+//...
+};
+
+
+
+

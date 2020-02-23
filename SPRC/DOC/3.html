@@ -1,0 +1,96 @@
+<HTML>
+<HEAD>
+<TITLE> SPRC/UNIX, Laborator U2</TITLE>
+</HEAD>
+<BODY>
+<center><H1> SPRC/UNIX: Laborator U3 </H1></center>
+<hr><center><h1> Paradigma client-server: un exemplu tipic</h1> </center> 
+<hr>       
+<h3> Introducere</h3>
+<p> Un exemplu clasic de aplicatie client-server este asocierea, in care folosind anumite conventii se poate crea un serviciu care mentine si
+actualizeaza o multime de perechii asociate dupa conventiile statibilite la 
+inceput. De ce este un exemplu clasic de aplicatie client-server? <br>
+Deoarece o astfel de aplicatie se poate imparti in doua entitati 
+distincte: <strong>Clientul</strong> care reprezinta interfata catre 
+utilizator si preia de la acesta comenzile si datele supuse asocierii, si 
+<strong>serverul</strong> care realizeaza efectiv asocierea si memorarea ei 
+dupa un anumit criteriu pentru referiri ulterioare. <br>
+In continuare vom prezenta necesitatile si cerintele implementarii unui
+serviciu de asociere de baza. 
+Dupa ce acest serviciu este implementat intr-un program de tip server se cere implementarea 
+unor programe client, ca de exemplu client tip carte de telefon si client 
+tip dictionar.  
+ <br>
+<h3> Serviciul de asociere de baza</h3>
+<p>
+Programul trebuie sa mentina o multime de asocieri. 
+Prin asociere se intelege o cuplare a unei <strong>chei</strong> cu o 
+<strong>valoare</strong> (in cazul cel mai simplu). Scopul este de a folosi 
+cheia pentru manevrarea mai usoara a valorii, cheia fiind, de obicei, o 
+entitate simpla (ca de exemplu un intreg) spre deosebire de valoare  care poate fi, 
+cel putin teoretic, orice entitate.<br>
+ In acest caz prin asociere se va intelege urmatorul cvintuplu 
+<code>(id,key,value,size,s)</code> unde fiecare reprezinta:
+<ul>
+<li> id - un intreg long
+<li> key - un pointer la un sir de caractere (conventia C)
+<li> value - un pointer la un tablou de octeti
+<li> size - numarul de octeti din value
+<li> s - starea asocierii si indica succesul sau nu al unei din operatiile urmatoare
+</ul>
+Pastrarea asocierilor se fac pe baza unei functii hash.
+Un exemplu de functie ar fi:<!--
+
+<pre>
+  h=0;
+  while(*p) h=T[h^*p++];
+  return h;
+</pre>
+-->
+</pre>
+ h=(key[0] + key[strlen(key)]*11 + 26*strlen(key)) % N
+</pre>
+
+unde N este lungimea tabelei si se recomanda sa fie numar prim<br> 
+
+Se pot folosi si alte tipuri de functii hash, de exemplu cele prezentate 
+in cursul de SDTP.
+<br><br><!-- <code>T</code> este o tabela ce contine n (stabilit de 
+constructor) intregi generati aleator iar <code>^</code> este operatia pe biti sau-exclusiv. In urma acestei functii hash in functie de valaore sirului continut in value se va genera un nume intreg care va fi folosit pentru memorarea (in tablou sau lista) a asocierii. <br>
+-->
+Campul id permite ca acelasi servicu sa fie folosit pentru mai multe 
+asocieri semantic diferite, alocand cate un id pentru fiecare dintre acestea. De exemplu asociatiilor tip carte de telefon (nume->numar de telefon) le sunt atribuite id-ul 0 si celor de
+
+ tip dictionar (cuvant romanesc-> cuvant englez) le sunt atribuite id-ul 1, si asa mai departe. <br>
+ Atentia functia hash nu este a functie perfecta adica nu asociaza o cheie la o si numai o valoare, asociarea este o cheie la o multime de valori. <br>
+ Functiile care practic interfateaza acestei structuri de date sunt urmatoarele:
+<ul>
+ <li> PutAssociation:(ID,Key,Value,Size)->Status
+ <li> Get Association:(ID,Key)->(Value,Size,Status)
+ <li> DeleteAssociation:(ID,Key)->Status
+ <li> Enumerate(ID)-> multimea de asocieri(chei)
+</ul> 
+ Fiecare din aceste functii reprezinta un serviciu oferit de serverul de asocieri. Acestui server i se ataseaza si baza de date cu asocieri, baza manevrata de serviciile de mai sus. <br>
+<br>
+<h3>Mersul Lucrarii</h3>
+<ul>
+<li> Construiti numai serverul de asocieri si testati-l ca un program obisnuit (nedistribuit).
+<li> Construiti cate un client pentru urmatoarele asocieri: <br>
+      0. nume persoana -> numar telefon <br>
+      1. cuvant romanesc -> cuvant englezesc <br>
+    <!--Clientii formeaza o interfata la un serviciu logic de directoare, 
+interfata care are urmatorele functii:<br>
+      <code>LookUp(DirID,key);</code> - cauta un test intr-un anume director corespunzand ID-ului dat.<br>
+      <code>AddName(DirID,nume,key);</code> -adauga un (nume,key) la directorul dat.<br>
+     <code>DelName(DirID,key);</code> - sterge un nume din directorul dat.<br>
+      <code>RenName(DirID,key,nume_nou);<code> - redenumeste intr-un anumit director.<br>
+      <code>GetNames(DirID);<code> - intoarce toate numele din directorul dat.<br>
+    Aceste functii sunt servicii ale clientului oferite utilizatorului. Ele se transforma in invocari ale anumitor servicii ale serverului, astfel in ordinea de mai sus se invoca in ordine urmatoarele servicii ale serverului: <code>PutAssociation</code>, 
+
+<code>GetAssociation</code>, <code>DeleteAssociation</code>, 
+<code>Enumerate</code>.--> 
+</ul>
+<br>
+
+<br>
+</body>

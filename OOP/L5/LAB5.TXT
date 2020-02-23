@@ -1,0 +1,119 @@
+			LABORATOR 5
+			-----------
+
+FUNCTII FRIEND
+    Functiile friend sint functii care nu sint metode ale unei clase,
+dar care au totusi acces la membrii privati ai acesteia. Orice functie 
+poate fi "friend" al unei clase, indiferent ca e vorba de functiile
+ordinare, metodele altor clase sau operatori redefiniti.
+
+   class B {
+      int a;
+      int f(void);
+      friend int f1(B&);
+    public:
+      friend int M::f2(B&,int);
+   };
+
+   int f1(B& rB)
+   {
+     return rB.f();
+   }	
+
+   int M::f2(B& rB,int j=0)
+   {
+     if(rB.a > 7) return j++;
+     else	  return j--;
+   }
+
+Dupa cum se poate vedea, nu are nici o importanta daca o functie este
+declarata "friend" in cadrul sectiunii private sau publice a unei clase.
+Functia f2 opereaza cu obiecte ale clasei B, declaratia ei in cadrul clasei B
+trebuie sa specifice clasa M careia ii apartine f2().
+Clasa M nu poate fi declarata anterior clasei B deoarece lista de parametri ai
+functiei f2() trebuie sa refere clasa B.
+
+CLASE FRIEND
+    In cazul in care se doreste ca toti membrii unei clase "M" sa
+aiba acces la partea privata a unei clase "B", in loc sa se enumere
+metodele lui "M" ca fiind "friends" ai lui "B", se poate declara
+direct clasa "M" drept "friend" al lui "B".
+
+    class M {
+      // ...
+    };
+
+    class B {
+      // ...
+      friend class M;
+    };
+
+Relatia de "friend" nu este tranzitiva, adica daca B1 este friend al
+lui B2 si B2 este friend al lui B3, nu inseamna ca B1 este implicit
+friend al lui B3.
+   Functiile "friend" nu au parametrul ascuns "this". Aceasta carenta
+se va suplini prin transmiterea unor parametrii obisnuiti de tip
+pointer, obiect sau referinta la obiect.
+  
+============  vezi  ex1_lab5.cpp    ==================
+
+
+PRINCIPII DE BAZA REFERITOARE LA ALOCAREA DE MEMORIE
+
+1. In cadrul metodelor este permisa atribuirea de valori pointerului
+   "this".
+
+2. La intrarea intr-un constructor, "this" va fi diferit de NULL doar
+   daca s-a alocat deja memorie pentru acel obiect.
+
+3. Daca in cadrul unui constructor se atribuie o valoare variabilei
+   "this"si, in plus, la intrarea in constructor "tjis" are valoarea
+   NULL, inseamana ca acel constructor a fost apelat datorita unei
+   creari dinamice de obiect (deci cu ajutorul operatorului NEW).
+   Astfel, testind la intrarea in procedura valoarea lui "this" se va
+   sti cu exactitate tipul apelului.
+
+   clasa::clasa(void)
+   {
+    // pentru ca testul de mai jos sa dea rezultate corecte e
+    // obligatoriu ca in cadrul constructorului sa existe o atribuire
+    // de tipul "this = ..."
+
+    if(this == NULL)	// apel din NEW
+      // ...
+    else		// obiectul nu a fost creat dinamic
+      // ...
+
+4. Alocarea memoriei necesare unui obiect cu ajutorul lui "malloc"
+   nu aduce dupa sine apelul implicit al constructorului clasei
+   respective (familia de functii "alloc" este pastrata doar pentru 
+   compatibilitate cu versiunile de C neobiectual).
+
+5. Daca in cadrul unui constructor se face o atribuire catre "this",
+   orice manipulare a unot membri ai clasei inaintea atribuirii poate
+   avea efecte dezastruoase.
+
+   class clasa 
+   {
+     int i, j;
+    public:
+     clasa(void);
+   };
+
+   clasa::clasa(void)
+   {
+     i = 16;  // GRESIT : in caz ca this == NULL nu se stie ce zona de 
+ 	      // memorie va fi initializata
+
+     if(this == NULL)
+       this = aloca_memorie();
+
+     i = 20;  // CORECT
+     j = 23;
+   }
+
+6. Un alt aspect interesant este legat de modul de alocare si
+   eliberare a  memoriei in cazul unor obiecte create dinamic si care
+   au ca membri pointeri la diverse entitati.
+
+===============    vezi ex2_lab5.cpp si ex3_lab5.cpp  	===============

@@ -1,0 +1,29 @@
+POINTERI LA METODE
+		Un pointer la metoda desemneaza adresa unei functii membru "M".
+Metodele unei clase au implicit un parametru tip "pointer la obiect", care
+se va transmite ascuns. Din acest motiv, parametrul in cauza nu va mai apare
+in lista de parametri a functiei desemnate de pointer.
+
+Exemplu:
+	class clasa
+		{
+		int contor;
+	 public:
+		void init(int nr=0)	{	contor = nr;	}
+		int increment(void)	{	return contor++;	}
+		};
+	// tipul "pointerLaMetoda" este un pointer la o metoda a clasei
+	//"clasa", metoda care nu are parametri si care returneaza "int"
+
+	typedef int (clasa::*pointerLaMetoda)(void);
+
+	void main(void)
+	{
+		clasa c1, *pc1=&c1;
+		pointerLaMetoda pM = clasa::increment;
+
+		c1.init(1);
+		pc1->init(2);
+		int i=(c1.*pM)();
+		i=(pc1->*pM)();
+	}

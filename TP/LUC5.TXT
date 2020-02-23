@@ -1,0 +1,319 @@
+		LUCRAREA 5:		FUNCTII DE BIBLIOTECA
+
+A. Consideratii teoretice
+
+	Limbajul C a fost conceput ca un limbaj relativ redus, evitƒndu-se
+elemente care nu au fost considerate strict necesare sau care ar reduce
+flexibilitatea si viteza de executie. Prin urmare, C care nu are incorporate
+facilitati de prelucrare directa a sirurilor de caractere, multimilor, listelor,
+tablourilor.  De asemenea, nu sunt prevazute Œn limbaj facilitati de intrare/
+iesire (nu exista instructiuni READ sau WRITE), de alocare dinamica de memorie
+sau metode de acces la fisiere. Pentru aceste operatii, cea mai mare parte a
+implementarilor de C ofera colectii standard de functii de biblioteca. Aceste
+functii ofera o varietate de optiuni. In plus, fiecare programator Œsi poate
+construi propria sa biblioteca de functii care sa Œnlocuiasca sau sa extinda
+colectia de functii standard ale limbajului.
+	Ne propunem Œn cadrul acestei lucrari sa trecem Œn revista si sa
+exemplificam functiile de biblioteca cele mai uzuale. (Precizam ca functiile
+pentru tratarea sirurilor de caractere si functiile relative la fisire sunt
+prezentate Œn lucrarea 4, respectiv lucrarea 5.)
+
+	1. Functii de intrare-iesire
+
+a. declarate Œn stdio.h
+
+	getchar
+
+Prototip:
+
+int getchar (void);
+
+Efect: returneaza un caracter citit de la tastatura sau constanta simbolica EOF
+daca s-a Œntƒlnit sfƒrsitul fisierului de intrare (perechea CTRL-Z).
+Observatie: Functia asteapta apasarea tastei Enter.
+
+	putchar
+
+Prototip:
+
+int putchar (int c);
+
+Efect: afiseaza caracterul c pe ecran; returneaza caracterul afisat sau valoarea
+EOF la detectia unei erori.
+
+	gets
+
+Prototip:
+
+char *gets (char *s);
+
+Efect: citeste un sir de caractere s de la tastatura pƒna la Œntƒlnirea
+caracterului newline; returneaza adresa sirului citit sau valoarea NULL daca
+s-a citit CTRL-Z.
+
+	puts
+
+Prototip:
+
+int puts (char *s);
+
+Efect: afiseaza pe ecran sirul s.
+
+	printf
+
+Prototip:
+
+int printf ( char *format, arg1, arg2, ...);
+
+Efect: afiseaza pe ecran valorile din lista de argumente, conform formatului
+specificat. Sirul format poate contine caractere ordinare, care se vor afisa ca
+atare, si descriptori de format prefixati de caracterul %. Un descriptor de
+format poate contine Œn ordine urmatoarele:
+
+- un semn minus care indica alinierea la stƒnga Œn cadrul formatului a valorii
+afisate;
+- un numar care specifica lungimea minima a cƒmpului de afisare;
+- un punct care separa lungimea cƒmpului de afisare de precizia de afisare (de
+ex. numarul de zecimale pentru valorile reale);
+
+	In tabelul urmator sunt aratate caracterele de conversie cele mai
+uzuale ce pot aparea Œn descriptorii de format:
+
+
+	Caracter			Valoare
+	d,i			Œntreg zecimal
+	o			Œntreg octal fara semn
+	x, X			Œntreg hexazecimal fara semn
+	u			ntreg zecimal fara semn
+	c			caracter
+	s			sir de caractere
+	f			real simpla precizie
+	lf			real dubla precizie
+
+Prezentam mai jos 3 modalitati de afisare a sirului de caractere "hello, world",
+utilizƒnd diverse formate:
+
+%s            :hello, world:     
+(sirul se afiseaza pe un cƒmp egal cu lungimea sirului)
+%-15s	       :hello, world   :     
+(sirul se  afiseaza pe un cƒmp de lungime 15, aliniat la  stƒnga)
+%15s         :   hello, world:
+ (se afiseaza pe un cƒmp de lungime 15, aliniat, implicit, la dreapta)     
+
+	scanf
+
+Prototip:
+
+int scanf (char *format, adr1, adr2,...);
+
+Efect: citeste caractere de la tastatura, conform formatului, si Œnscrie
+valorile citite la adresele specificate. Functia returneaza numarul de cƒmpuri
+citite cu succes sau valoarea EOF la Œntƒlnirea sfƒrsitului fisierului de
+intrare.  Sirul format poate contine:
+
+- caractere blank sau tab care sunt ignorate;
+- caractere ordinare care trebuie sa fie citite corespunzator de la intrare;
+- specificatori de conversie, la fel ca la printf.
+
+	Specificatorii de conversie determina modul de conversie a cƒmpurilor
+de intrare. Un cƒmp de intrare se defineste ca o secventa de caractere, altele
+decƒt spatiile albe ale limbajului: blank, tab, newline, carriage return,
+formfeed, tab vertical. 
+
+De exemplu, pentru citirea unei linii de forma:
+
+6 Mar 1996
+
+se va scrie urmatoarea secventa:
+
+int zi, an;
+char luna[4];
+
+scanf ("%d %s %d", &zi, luna, &an);
+
+	Se observa ca la variabilele zi si an s-a folosit operatorul de adresa
+&; la variabila luna el nu apare deoarece Œn limbajul C numele unui tablou este
+echivalent cu adresa sa (este un pointer catre primul sau element).
+
+Observatie: Pentru mai multe informatii privind functiile scanf si printf
+cititi fisierul de help prezent Œn mediul Turbo C.
+
+	sscanf
+	
+Prototip:
+
+int sscanf (char *sir,char *format, adr1, adr2,...);
+
+Efect: citeste date cu formatare; spre deosebire de scanf la care citirea se
+face de la tastatura, la sscanf citirea datelor se face dintr-un sir (vezi
+exemplul 1).
+
+b. declarate Œn conio.h
+
+	getch
+
+Prototip:
+
+int getch (void);
+
+Efect: citeste un caracter de la tastatura fara sa-l afiseze pe ecran;
+returneaza caracterul citit.
+
+	getche
+
+Prototip:
+
+int getche (void);
+
+Efect: citeste un caracter de la tastatura si-l afiseaza pe ecran; returneaza
+caracterul citit.
+
+	ungetch
+
+Prototip:
+
+int ungetch (int c);
+
+Efect: reinsereaza caracterul c Œn buffer-ul tastaturii, astfel Œncƒt urmatorul
+caracter care va fi citit este cel reinserat. 
+
+
+	2. Functii matematice
+
+Aceste functii sunt declarate Œn fisierul antet math.h
+
+Prototipul functiei			Efect
+double acos (double x);			arccosinus de x
+double asin (double x);			arcsinus de x
+double atan (double x);			arctangenta de x
+double atan2 (double y, double x);	arctangenta de y/x
+double ceil  (double x);		cel mai mic Œntreg mai mare sau egal cu x
+double cos  (double x);			cosinus de x
+double  exp (double x);			exponentiala e la puterea x
+double  fabs (double x);		valoarea absoluta a lui x 
+double  floor (double x);		cel mai mare Œntreg mai mic sau egal cu x
+double  log (double x);			ln de x
+double  log10 (double x);		lg de x
+double  pow (double x, double y);	x la puterea y
+double  sin (double x);			sinus de x
+double  sqrt (double x);		radicalul lui x
+double  tan (double x);			tangenta lui x
+
+3. Functii de conversie
+
+	Prezentam doua functii de conversie a unui sir de caractere Œntr-o
+valoare Œntreaga, respectiv Œntr-o valoare reala. Aceste functii sunt declarate
+Œn fisierul antet stdlib.h.
+
+	Prototip		Efect
+	int atoi (char *s);	converteste sirul s Œntr-o valoare Œntrega
+	double atof (char *s);	converteste sirul s Œntr-o valoare reala
+
+B. Exemple
+
+	1. Sa se scrie un program care citeste o succesiune de linii ce contin
+date calendaristice Œn formatul: zi/luna/an. Se cere sa se afiseze liniile
+scrise corect conform formatului specificat anterior.
+
+#include <stdio.h>
+
+void main(void){
+ char linie[80];
+ int zi, luna, an;
+
+ while (gets(linie)!=NULL)
+    if(sscanf(linie, "%d/%d/%d", &zi, &luna, &an)==3)
+         printf("%s\n", linie);
+}
+	2.  Sa se realizeze programul care citeste o secventa de numere reale,
+terminata cu EOF si afiseaza dupa fiecare citire suma valorilor absolute citite
+pƒna Œn acel moment. Afisarea sumei se face cu o precizie de 3 cifre zecimale.
+ 
+#include <stdio.h>
+#include <math.h>
+
+void main(void){
+ double suma, valoare;
+ suma=0;
+
+ while(1) {
+   printf("\ndati un numar:");
+   if(scanf("%lf", &valoare) == EOF) break;
+   printf("\t %.3lf\n", suma+=fabs(valoare));
+ }
+}
+
+
+	3. Se citeste de la tastatura un text terminat cu EOF. Se cere sa se
+afiseze toate numerele Œntregi continute Œn text.
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#define N   15
+
+void main(void){
+
+ char c;  	 /* caracterul citit la un moment dat */
+ char s[20];/*buffer pentru caracterele ce compun un numar */
+ int numere[N];      /* tablou cu numerele citite */
+ int i=0;
+ int j=0;
+
+ c=getchar();
+ while (c != EOF)
+    if (isdigit(c))  /* incepe un numar */
+      {
+        i=0;s[i++]=c;
+        while (isdigit(c=getchar()))
+          s[i++]=c;
+        s[i]='\0';
+        numere[j++]=atoi(s);
+       }
+    else
+      c=getchar();
+
+ /* afisarea numerelor */
+ for (i=0; i<j; i++)
+   printf("\n %6d", numere[i]);
+}
+Observatie:
+	Pentru a testa daca un caracter este cifra s-a folosit functia isdigit()
+declarata Œn fisierul antet ctype.h (vezi lucrarea 4).  Dupa ce s-au citit
+caracterele corespunzatoare unui numar, folosind functia atoi, se face conversia
+Œn numarul Œntreg corespunzator. Numerele Œntƒlnite Œn cadrul textului se
+memoreaza Œn tabloul numere. 
+
+
+C. Probleme propuse
+
+	1. Scrieti instructiunea care va afisa urmatoarele linii:
+ 
+	H. Smith /78 \ aaa #67 "ggg"
+	mmm
+
+
+	2. Aratati ce afiseaza urmatorul program:
+
+
+void main(void){
+
+  int i=43;
+  char c='A';
+  float f=55.45;
+
+  printf("%5d %.1f %c\n",i,f,c);
+  printf("%d %d %d \n",i, (int)f, c);
+  printf("%c %d\n", c+1, c);
+}
+
+	3. Sa se scrie un program care citeste de la tastatura un numar real x
+si un caracter ce reprezinta optiunea utilizatorului privind operatia ce trebuie
+efectuata cu numarul respectiv, dupa care afiseaza rezultatul operatiei.
+Prezentam mai jos optiunile posibile:
+
+'e'   - e la puterea x
+'l'    -  ln de x
+'r'    - radicalul lui x
+'m'  -  valoarea absoluta a lui x. 

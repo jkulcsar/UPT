@@ -1,0 +1,28 @@
+//Sa se creeze o lista simplu inlantuita de siruri de caractere, un element
+//din lista fiind o instanta a urmatoarei clase:
+
+class node{
+	static node *head;	//pointer la lista
+	node *next;		//legatura la urmatorul elem. din lista
+	char *info;		//sirul de caractere a unui elem. din lista
+   public:
+	node(char * = NULL);	//declararea constructorului
+	void display_all();	//afiseaza nodurile listei
+};
+
+node::node(char *ptr)
+{
+//se insereaza noul nod in lista
+
+}
+
+void node::display_all()
+{
+//se parcurge lista, afisandu-se cimpul de informatii al fiecarui nod
+
+}
+
+void main()
+{
+
+}

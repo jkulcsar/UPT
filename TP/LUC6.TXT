@@ -1,0 +1,375 @@
+	LUCRAREA 6:	PRELUCRAREA FISIERELOR
+
+A. Consideratii teoretice
+
+	In C, spre deosebire de alte limbaje de programare, operatiile de intrare/iesire nu se efectueaza pe baza unui tip de date si a unor functii incorporate in limbaj. Deoarece aceste prelucrari depind de caracteristicile sistemului de operare, ele sunt furnizate de functii din bibioteca standard a limbajului. 
+	Functiile utilizate pana Œn acest moment (de ex: getchar, printf, gets, etc.) opereaza cu echipamentele standard de introducere si extragere: tastatura si ecranul monitorul. In cadrul acestei lucrari trecem Œn revista cateva functii pentru operatii de intrare/iesire care transfera date Œntre calculator si fisierele memorate pe disc. 
+	Prelucrarea unui fisier presupune Œn primul rand deschiderea sa, operatie prin care i se asociaza un canal de intrare/iesire sau flux (stream), se creaza o variabila structura de tipul FILE (definit Œn stdio.h) si se rezerva spatiu pentru zona tampon utilizata la transferul datelor. Structura de tipul FILE contine informatii dependente de implementare cum ar fi: adresa si lungimea zonei tampon de date, modul de utilizare a fisierului, indicatorul de sfarsit de fisier, indicatorul de pozitie, etc.
+	In C exista doua tipuri de stream-uri:
+	- text - care este o succesiune de linii de text despartite prin caracterul NL (newline).
+	- binar - care este o succesiune de octeti fara nici o structura.
+
+	Prezentam Œn continuare functiile mai uzuale pentru prelucrarea fisierelor.
+
+	Deschiderea/Œnchiderea fisierelor
+
+	La lansarea Œn executie a unui program se deschid trei fisiere cu canale de tip text:
+	- stdin - pentru intrarea standard, asociat implicit tastaturii;
+	- stdout - pentru iesirea standard, asociat implicit ecranului monitorului;
+	- stderr - pentru iesirea standard pentru erori, asociat implicit ecranului monitorului.
+
+	Orice alte fisiere utilizate Œn program trebuie deschise Œn mod explicit cu functia fopen.
+
+	FILE *fopen(const char *filename, const char *mode); 
+	Prin aceasta se deschide fisierul cu  numele filename (care poate include si specificarea caii), i se asociaza un stream si se returneaza un pointer catre structura FILE creata sau NULL, daca fisierul nu a putut fi deschis. Acest pointer este folosit Œn operatiile ulterioare asupra fisierului.
+	Parametrul mode este un sir de caractere care poate avea urmatoarele valori:
+	r 	deschide pentru citire;
+	w	deschide pentru scriere ( daca fisierul exista anterior el va fi sters);
+	a	deschide pentru adaugare (scriere la sfarsitul fisierului);
+	r+ 	deschide un fisier existent pentru actualizare (citire si scriere);
+	w+	deschide un fisier nou pentru actualizare; 
+	 a+	deschide pentru actualizare la sfarsitul fisierului.
+
+	La sfarsitul sirului de caractere reprezentand modul de acces se mai poate adauga optional sufixul:
+	
+	t	pentru prelucrare Œn mod text (implicit);
+	b	pentru prelucrare Œn mod binar. 
+
+	Inchiderea unui fisier deschis cu fopen se realizeaza cu functia fclose:
+	
+	int fclose(FILE *fp); 
+
+unde fp este pointerul returnat de functia fopen. Prin Œnchiderea fisierului se elibereaza si zona tampon alocata acestuia. Functia returneaza valoarea 0 daca operatia de Œnchidere s-a efectuat cu succes, respectiv EOF (-1) Œn caz de eroare.
+
+	Testarea sfarsitului de fisier		
+
+	Functia feof:
+
+	int feof (FILE *fp);
+
+returneaza o valoare nenula daca s-a Œntalnit sfarsitul de fisier la ultima operatie de intrare si 0 Œn caz contrar.
+
+	Golirea buffer-ului unui fisier
+
+	Functia fflush:
+
+	int fflush (FILE *fp);
+
+determina golirea buffer-ului unui fisier.
+	Citirea si modificarea indicatorului de pozitie	
+
+	Functia fgetpos:
+
+	int fgetpos (FILE *fp, long int *poz);
+
+Œnscrie valoarea indicatorului de pozitie Œn variabila adresata prin pointerul poz si returneaza 0 Œn caz de succes.
+
+	Functia setpos:
+
+	int fsetpos (FILE *fp, const long int *poz);
+
+atribuie indicatorului valoarea variabilei  indicata prin pointerul poz si returneaza valoarea 0 Œn caz de succes.
+
+	Functia fseek:
+
+	  int fseek (FILE *fp, long offset, int whence);
+
+repozitioneaza indicatorul fisierului la valoarea whence+offset; whence poate avea urmatoarele valori:
+   	SEEKtSET =  0 -  Œnceput de  fisier
+     	SEEKtCUR =  1 - pozitie curenta
+     	SEEKtEND =  2 - sfarsit de  fisier
+
+	Transferul caracterelor:
+  
+	Functia getc:
+
+	int getc(FILE *fp);         
+
+returneaza urmatorul caracter citit din fisierul fp sau EOF daca se Œntalneste sfarsitul fisierului.
+
+	Functia ungetc:
+
+	int ungetc(int c, FILE *fp);
+
+ repune caracterul c Œn fisierul de intrare fp.
+
+	Functia putc:
+
+	int putc(int c, FILE *fp); 
+
+ Œnscrie caracterul c Œn fisierul fp; Œn caz de eroare returneaza EOF.
+	
+	Transferul sirurilor de caractere
+
+	Functia fgets:
+
+	char *fgets(char *s, int n, FILE *fp); 
+
+citeste maxim n-1 caractere din fisierul fp sau pana la '\n' inclusiv, le depune Œn s, adauga la sfarsit '\0' si returneaza adresa sirului s; Œn caz de eroare Œntoarce valoarea NULL.
+
+	Functia fputs:
+
+	int fputs(const char *s, FILE *fp);    
+
+scrie sirul s Œn fisier, fara caracterul '\0'; Œn caz de eroare Œntoarce valoarea EOF.
+
+	Citirea si scrierea cu format
+
+	Functia fscanf (similara cu scanf):
+
+	int fscanf (FILE *fp, const char *format [, adresa, ...]);
+
+citeste date din fisierul fp, conform formatului specificat; returneaza numarul campurilor de intrare pentru care citirea, conversia si memorarea s-au efectuat corect sau EOF daca s-a Œntalnit sfarsitul fisierului.
+
+	Functia fprintf (similara cu printf):
+
+	int fprintf (FILE *fp, const char *format [, argum...]); 
+
+scrie date, conform formatului Œn fisierul fp; returneaza numarul de octeti transferati sau EOF Œn caz de eroare.
+
+
+B. Exemple
+
+	1. Sa se scrie un program care afiseaza lungimea celei mai lungi linii din fisierul text TEST:
+
+/*---------------------------------------------------------*/
+/*                                                         */
+/*       afiseaza lungimea lgtmax a celei mai lungi        */    
+/*               linii a fisierului                        */
+/*                                                         */
+/*---------------------------------------------------------*/
+
+#include <stdio.h>
+
+void main(void){
+
+ FILE *f;
+ char c;
+ int lgtmax, lgtcurenta;
+
+ lgtmax=lgtcurenta=0;
+
+ if(!(f=fopen("TEST","r"))){
+	puts("fisierul TEST nu poate fi deschis");
+	return;}
+
+ while ((c=getc(f)) != EOF)
+	if (c == '\n') {
+	       if  (lgtmax < lgtcurenta)
+       		lgtmax = lgtcurenta;
+	       lgtcurenta = 0;
+           }
+      else
+	    lgtcurenta++;
+
+ fclose(f);
+ printf ("\n linia cea mai lunga are lungimea %d", lgtmax);
+}
+                     
+	2. Sa se scrie un program care copiaza un fisier binar sursa Œn alt fisier binar destinatie.
+
+/*---------------------------------------------------------*/
+/*                                                         */
+/*         copiaza continutul unui fisier binar            */
+/*             in alt fisier binar                         */
+/*                                                         */
+/-------------------------------------------------------- -*/
+#include <stdio.h>
+
+void main(void){
+ FILE *fs, *fd;
+ char c;
+ if ((fs=fopen("sursa", "rb"))==NULL){
+    fprintf(stderr, "fisierul sursa nu poate fi deschis \n");
+    return;}
+ if ((fd=fopen("dest", "wb"))==NULL){
+    fprintf(stderr, "fisierul dest nu poate fi deschis \n");
+    return;}
+ while(1){
+      c=getc(fs);
+      if (feof(fs))
+          break;
+      putc(c, fd);
+ }
+ fclose(fs);
+ fclose(fd);
+}
+
+	3. Sa se realizeze un program care pastreaza evidenta unei grupe de studenti. Datele despre studenti (numele, varsta, media) se pastreza sub forma unui fisier text. Programul trebuie sa permita urmatoarele optiuni:
+
+	a, A	adaugarea unui nou student Œn fisier;
+	l, L 	listarea datelor tuturor studentilor;
+	m, M	modificarea datelor unui student;
+	x, X	terminarea programului;
+
+/*---------------------------------------------------------*/
+/*                                                         */                                                                                                              
+/*     evidenta unei grupe de studenti                     */
+/*                                                         */
+/*---------------------------------------------------------*/
+
+
+#include <stdio.h>
+#include <conio.h>
+#include <ctype.h>
+#include <stdlib.h>
+#include <string.h>
+#define LNUME  20          /* lungimea maxima a numelor  */
+
+typedef struct {
+       char nume[LNUME];
+       int virsta;
+       float medie;
+     } student;
+
+char fisier[13];          /* numele fisierului */
+
+
+/*---------------------------------------------------------*/
+/*                                                         */
+/*  adauga datele unui nou student in fisier               */
+/*                                                         */
+/----------------------------------------------------------*/
+
+void adauga(void){
+
+ FILE *f;
+ student s;
+
+ if (!(f=fopen(fisier, "at"))){
+       puts("\nfisierul nu poate fi deschis");
+       return;
+  }
+  printf("\n dati numele, virsta, media:");
+  scanf("%s %d %f", s.nume, &s.virsta, &s.medie);
+  fflush(stdin);        /*se goleste buffer-ul tastaturii */
+  fprintf(f, "%20s %2d %6.2f\n",s.nume,s.virsta, s.medie);
+  fclose(f);
+}
+
+
+/*---------------------------------------------------------*/
+/*                                                         */
+/*  afiseaza  datele tuturor studentilor                   */
+/*                                                         */
+/----------------------------------------------------------*/
+
+void listare(void){
+
+ FILE *f;
+ student s;
+
+ if (!(f=fopen(fisier, "rt"))){
+       puts("\nfisierul nu poate fi deschis");
+       return;
+   }
+ while(fscanf(f,"%s %d %f", s.nume,&s.virsta, &s.medie)!=EOF)
+    printf("\n%-20s %-2d %-6.2f\n",s.nume,s.virsta, s.medie);
+ fclose(f);
+}
+
+
+/*---------------------------------------------------------*/
+/*                                                         */
+/*           modifica  datele studentului                  */
+/*    al carui nume se citeste in variabila n              */
+/*                                                         */
+/*---------------------------------------------------------*/
+
+void modifica(void){
+
+ int gasit=0;
+ FILE *f;
+ student s;
+ char n[LNUME];  /* numele studentului ale carui date se vor     
+                   modifica */
+
+ if (!(f=fopen(fisier, "r+t"))){
+       puts("fisierul nu poate fi deschis");
+       return;
+   }
+  printf("\n numele studentului:");
+  gets(n);
+  while(fscanf(f,"%s %d %f",s.nume,&s.virsta, &s.medie)!=EOF)
+    if(!strcmp(n,s.nume)){
+      /* studentul a fost gasit,se afiseaza datele sale */
+      printf("%-20s %-2d %-6.2f\n",s.nume,s.virsta, s.medie);
+      gasit=1;
+      break;
+      }
+  if (!gasit)
+      printf("\n studentul %s nu exista in fisier", n);
+  else {
+      printf("\n dati numele, virsta, media:");
+      scanf("%s %d %f",s.nume, &s.virsta, &s.medie);
+      fflush(stdin);
+      /* pozitionare la inceputul inregistrarii */
+      fseek(f,-30,SEEKtCUR);
+      fprintf(f,"%20s %2d %6.2f\n",s.nume,s.virsta, s.medie);
+     }
+ 
+ fclose(f);
+}
+
+/*---------------------------------------------------------*/
+/*                                                         */
+/*   afiseaza  meniul programului                          */
+/*                                                         */
+/*---------------------------------------------------------*/
+
+void meniu(void){
+  puts ("\na, A ---- adaugare student");
+  puts ("m, M ---- modificare date student");
+  puts ("l, L ---- listare studenti");
+  puts ("x, X ---- parasire program");
+ }
+
+void main(void){
+
+char opt;
+
+puts("nume fisier:");
+gets(fisier);
+
+while(1){
+ meniu();
+ opt=tolower (getche());
+ 
+switch(opt){
+   case 'a' : adauga();
+              break;
+   case 'm' : modifica();
+              break;
+   case 'l' : listare();
+              break;
+   case 'x' : exit(0);
+   default  : puts("comanda eronata\n");
+  }
+ }
+}
+
+	Se observa ca cele trei operatii principale efectuate asupra fisierului: adaugare, listare si modificare sunt implementate Œn trei functii distincte.
+	Functia adauga Œnscrie Œn fisier datele unui student sub forma unei Œnregistrari de 30 de octeti (20 pentru nume, 1 spatiu, 2 pentru varsta, 1 spatiu, 6 pentru medie). Acest lucru este folosit Œn functia modifica cand se repozitioneaza indicatorul de pozitie Œn fisier la Œnceputul Œnregistrarii care urmeaza a fi modificata.
+
+
+C. Probleme propuse
+
+	1. Intr-un fisier "cod.dat" este memorata o tabela de codificare, sub forma: 
+	caractertdetcodificat ' ' caractertcodificat '\n'
+Se cere sa se preia un text din fisierul "dat1.dat", sa se codifice, iar textul obtinut sa se scrie Œn fisierul "dat2.txt".
+
+	2. Se considera doua fisiere care contin numere Œntregi Œn ordine strict crescatoare, cate un numar pe o linie. Se cere sa se creeze un al treilea fisier, obtinut prin interclasarea primelor doua. Daca un numar apare Œn ambele fisiere de intrare, el va aparea o singura data Œn fisierul rezultat.
+
+	De exemplu:
+
+fisier1:      
+ -1 0 4 5 67 123 678 2677
+fisier2:
+ 8 12 123 1234 1235 1236 7890 7892
+fisier3( rezultat): 
+-1 0 4 5 8 12 67 123 678 1234 1235 1236 2677 7890 7892
+
+	3. Scrieti un program care concateneaza doua fisiere, FIS1 si FIS2 Œn fisierul FIS3.
+
+
+	4. Dintr-un fisier de intrare se citeste o propozitie terminata cu punct. Propozitia este formata din cuvinte ce contin doar litere mari. Cuvintele sunt separate prin unul sau mai multi separatori din multimea {' ','\t','\n'}. Stiind ca propozitia are cel mult 30 de cuvinte, sa se afiseze grupurile de cuvinte Œn care fiecare membru reprezinta anagrama altui membru din grup. Un grup va contine numarul maxim de membri, iar membrii sunt distincti.

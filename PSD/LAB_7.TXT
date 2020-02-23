@@ -1,0 +1,573 @@
+Programarea Sistemelor de Conducere Distribuita
+
+			LABORATOR 7
+
+                Listarea la imprimanta
+
+        Imprimanta poate fi conectata direct la o statie sau la
+server. In cazul in care ea este conectata la o statie comunicarea se
+face direct prin cablul care leaga imprimanta de statie. Daca
+imprimanta este conectata la server, fisierul care va fi listat va fi
+introdus intr-o coada de asteptare si va fi listat cand ii vine
+randul.
+        Pe o retea pot sa existe mai multe cozi de asteptare
+configurate diferit. Daca o coada deserveste mai multe imprimante,
+fisierul care urmeaza sa fie listat va fi trimis catre imprimanta
+libera. Daca doua cozi cu diferite nivele de prioritate deservesc
+aceeasi imprimanta, serviciile mai urgente vor fi listate inaintea
+celor mai putin urgente.
+        Retelele mai vechi suportau conectarea a doar 5 imprimante in
+retea. Ele trebuiau legate la server. 
+        Pentru a permite conectarea mai multor imprimante s-au
+introdus Print Server-ele. In aceste cazuri imprimantele pot fi
+conectate la orice statie si pot fi localizate de oriunde.
+
+                Crearea cozilor pe retelele NetWare 2.2
+
+        Pasii care trebuie parcursi pentru a lista la o imprimanta
+conectata la server sunt:
+1. se creaza o coada care de exemplu se numeste HPLASER
+
+        QUEUE HPLASER CREATE
+
+2. se specifica portul la care este conectata imprimanta
+
+        PRINTER 0 CREATE LPT1:
+
+3. se asociaza imprimanta cu coada
+
+        PRINTER 0 ADD QUEUE HPLASER
+
+Din acest moment toate serviciile care vor fi depuse in coada HPLASER
+vor fi listate la imprimanta 0.
+
+        Numarul imprimantelor poate fi de la 0 la 4. Fiecare
+imprimanta trebuie asociata la cate un port. 
+        Setarile sunt valabile pana la resetarea server-ului. Pentru
+a se face de fiecare data cand server-ul este pornit, se introduc
+comenzile in fisierul AUTOEXEC astfel:
+1. se lanseaza SYSCON
+2. se selecteaza optiunea "Supervisor Options"
+3. se selecteaza optiunea "Edit System AUTOEXEC file"
+4. se introduc urmatoarele comenzi in fisier:
+
+        PRINTER 0 CREATE LPT1
+
+        PRINTER 0 ADD QUEUE HPLASER
+
+
+                Crearea cozilor cu PCONSOLE
+
+        Se parcurg urmatorii pasi:
+1. se lanseaza PCONSOLE
+2. se selecteaza optiunea "Print Queue Information"
+3. se apasa tasta Ins
+4. se introduce numele cozii
+Dupa ce a fost creata, coada trebuie atasata unei
+imprimante cu comanda de consola PRINTER
+
+
+                Configurarea unui Print Server
+
+        In general intregul proces de listare, oricat
+de complicat ar fi el, este controlat de un Print
+Server care se configureaza la fel. 
+        Fie un Print Server care controleaza 2
+imprimante, una legata la server care se numeste de
+exemplu LASER1 si una legata la o statie de lucru
+denumita MATRIX1. Dupa ce a fost definit, Print
+Server-ul se poate lansa ca un modul NLM, VAP sau un
+fisier EXE de pe o statie de lucru. 
+	Pasii care se parcurg in configurarea unui Print Server sunt:
+1. conectarea se va face prin supervisor
+2. se lanseaza PCONSOLE
+3. se selecteaza optiunea "Print Queue Information". Se afiseaza lista cu
+cozile existente.
+4. se apasa tasta Ins
+5. se introduce numele primei cozi LASER1
+6. se apasa tasta Ins
+7. se introduce numele celei de-a doua cozi MATRIX1
+8. se apasa tasta Esc
+9. se selecteaza optiunea "Print Server Information". Se afiseaza lista cu
+Print Server-ele existente
+10. se apasa tasta Ins
+11. se introduce numele Print Server-ului: PSERVER1
+12. se apasa tasta Enter pe numele acestuia. Se va deschide o fereastra ce
+contine informatii despre Print Server
+13. se selecteaza optiunea "Print Server Configuration"
+14. se selecteaza optiunea "Printer Configuration". Se va afisa lista de
+imprimante setate pe Not Installed
+15. se selecteaza printer 0
+16. se completeaza optiunile afisate si se salveaza
+17. se selecteaza optiunea "Queues Serviced by Printer". Se va afisa lista
+imprimantelor
+18. se selecteaza printer 0
+19. se apasa tasta Ins
+20. se selecteaza coada LASER1. Daca se apasa Enter coada va fi atasata la
+imprimanta selectata cu prioritatea 0
+	Pentru a configura printer 1 se reiau pasii de la 15 la 20. Cele
+doua configurari vor diferi doar la anumite optiuni:
+LASER1 - este atasat la server, are tip Parallel, LPT1:. In cazul
+imprimantelor atasate la server nu se configureaza intreruperi
+LASER1 - este atasat la statie de lucru, are tip Remote Parallel, LPT1:.
+In acest caz se va configura imprimanta cu o intrerupere. (7 este normal
+pentru LPT1). 
+	Daca la o imprimanta se vor atasa mai multe cozi, ele pot avea
+prioritati diferite. O coada poate fi atasata la mai multe imprimante. Un
+fisier trimis la o astfel de coada va fi listat la imprimanta care este
+prima disponibila.
+
+	Lansarea lui PSERVER.NLM pe un server NetWare 386
+
+	Dupa ce a fost definit, un print server, el poate fi lansat
+astfel:
+- la tastatura server-ului se introduce comanda:
+
+	LOAD PSERVER PSERVER1
+
+PSERVER necesita 128K de memorie. Dupa ce a fost lansat, se va afisa
+starea a 8 din cele 16 imprimante. La apasarea unei taste se va afisa
+starea ultimelor 8 imprimante.
+
+
+	Lansarea lui PSERVER.VAP pe un server NetWare 286
+
+	Se parcurg urmatorii pasi:
+1. se copiaza fisierul PSERVER.VAP din directorul PUBLIC in directorul
+SYSTEM
+2. se reinitializeaza server-ul
+3. se raspunde cu Y la intrebarea 
+
+Value Added Processes have been defined. Do you wish to load them ?
+
+4. se introduce numele print server-ului definit cu PCONSOLE
+
+Oprirea unui print server se face cu comanda de consola:
+
+	PSERVER STOP
+
+Relansarea lui se face cu comanda de consola:
+
+	PSERVER START
+
+
+	Lansarea lui PSERVER.EXE de pe o statie de lucru
+
+Se vor parcurge urmatorii pasi:
+1. se formateaza o discheta cu optiunea /S. Se initializeaza statia cu
+aceasta discheta
+2. se instaleaza IPX.COM si NETx.COM in radacina dischetei
+3. se copiaza pe discheta urmatoarele fisiere:
+
+IBM$RUN.OVL
+PSERVER.EXE
+SYS$ERR.DAT
+SYS$HELP.DAT
+SYS$MSG.DAT
+
+4. se conecteaza o imprimanta la statia de interes
+5. se creaza fisierul SHELL.CFG care trebuie sa contina linia:
+
+	SPX CONNECTIONS=60
+
+6. se creaza fisierul AUTOEXEC.BAT pe discheta sistem care va contine:
+
+	IPX
+	NETx
+	PSERVER nume_file_server nume_print_server
+
+- unde x se inlocuieste cu numarul versiunii de retea
+7. se initializeaza statia de lucru
+
+
+		Verificarea statii unui print server
+
+	Se parcurg urmatorii pasi:
+1. se lanseaza PCONSOLE
+2. se selecteaza optiunea "Print Server Information"
+3. se selecteaza print server-ul dorit
+4. se selecteaza optiunea "Print Server Status/Control"
+5. se selecteaza "Server Info". Daca aceasta optiune nu apare inseamna ca
+print server-ul selectat nu este activ
+
+
+
+
+		Pornirea unei imprimante conectate la o statie
+
+	Dupa ce a fost instalat un print server, se pot rula programele
+care permit unei statii sa suporte conectarea unei imprimante la ele.
+Acest software se comporta ca un program rezident (TSR), care necesita 9K
+de memorie. Statia, in continuare, se va comporta ca o statie de lucru
+normala.
+	Se parcurg urmatorii pasi:
+1. se conecteaza imprimanta la portul statiei de lucru dorite. Portul
+trebuie sa corespunda cu setarile facute cu PCONSOLE.
+2. se va introduce urmatoarea linie de comanda in fisierul SHELL.CFG din
+directorul care contine si fisierele IPX.COM si NETx.COM:
+
+	PREFERRED SERVER=nume_file_server
+
+3. se creaza urmatorul fisier AUTOEXEC.BAT:
+
+	ECHO OFF
+	CLS
+	PROMPT $P$G
+	PATH F:\DOS
+	F:
+	CD \NETWORK
+	IPX
+	NETx
+	:LOOP
+	CLS
+	ECHO se initializeaza imprimanta
+	RPRINTER nume_server numar_imprimanta
+	IF ERRORLEVEL 1 GOTO LOOP
+	CLS
+	LOGIN
+
+- pentru initializarea imprimantei s-a creat o bucla deoarece uneori
+aceasta necesita apeluri repetate a lui RPRINTER
+
+4. se copiaza urmatoarele fisiere din directorul PUBLIC in directorul
+LOGIN:
+
+	IBM$RUN.OVL
+	RPRINTER.EXE
+	RPRINTER.HLP
+	SYS$HELP.DAT
+	SYS$ERR.DAT
+	SYS$MSG.DAT
+
+5. se reseteaza statia de lucru
+	
+
+		Redirectarea listarii 
+
+	Iesirea trebuie redirectata catre o coada, o imprimanta conectata
+la server sau catre un print server. Redirectarea se poate aplica din
+orice aplicatie care lucreaza cu porturile LPT1, LPT2, sau LPT3 si cu
+tasta Print Screen.
+	Se parcurg urmatorii pasi:
+1. se introduce comanda:
+
+	CAPTURE LOCAL=1 QUEUE=LASER1 NB NFF NT TIMEOUT=5
+
+2. se lanseaza o aplicatie care este configurata sa listeze la portul LPT1
+3. se listeaza din cadrul aplicatiei
+4. se paraseste aplicatia
+5. se introduce comanda ENDCAP pentru a dezactiva redirectarea
+
+
+	Optiunile cele mai importante a comenzii CAPTURE sunt:
+
+QUEUE=nume_coada sau Q=nume_coada
+- se specifica numele cozii de listare
+
+JOB=nume_serviciu_de_listare sau J=nume_serviciu_de_listare
+- specifica utilizarea altei configurari de listare decat cea implicita
+
+LOCAL=n sau L=n
+- n poate fi 1, 2 sau 3 pentru LPT1, LPT2 respectiv LPT3. Pentru a seta
+toate 3 se folosesc 3 comenzi CAPTURE separate
+- daca nu specifica aceasta optiune se ia implicit LPT1
+
+TIMEOUT=n sau TI=n
+- aceasta optiune se utilizeaza in cazul aplicatiilor care nu sunt de
+retea. Acestea nu trimit fisierul de listat in intregime, ci pe portiuni.
+Optiunea TIMEOUT forteaza reteaua sa inchida serviciul de listare trimis
+de aplicatie si daca intr-un numar de secunde egal cu n nu primeste alt
+serviciu, porneste listarea fisierului trimis de aplicatie.
+
+NB
+- nu se listeaza antetul
+
+NFF
+- nu se trece la pagina noua la sfarsitul unei listari
+
+NT
+- caracterele TAB nu vor fi convertite in spatii. Optiunea e foarte
+importanta in cazul listarii unui fisier ce contine caractere grafice
+
+NOTIFY si NONOTIFY
+- se transmite/sau nu, un mesaj utilizatorului dupa ce s-a terminat
+listarea
+
+CR=nume_fisier
+- se specifica numele fisierului care va fi listat
+
+	Comanda ENDCAP ALL dezactiveaza toate redirectarile. 
+Comanda ENDCAP LOCAL=n dezactiveaza redirectarea la portul LPTn. Nu se
+ruleaza ENDCAP pana ce listarea nu s-a terminat.
+	Pentru a lista redirectarile curente se foloseste comanda:
+
+	CAPTURE SH
+
+	Daca comanda CAPTURE este plasata in fisierul login script ea
+trebuie sa fie precedata de caracterul "#", deoarece este o comanda
+externa fisierului login script.
+
+
+
+		Listarea cu PRINT si NPRINT
+
+
+	Pentru a lista cu comanda PRINT se parcurg urmatorii pasi:
+1. se introduce comanda CAPTURE cu optiunile dorite
+2. se da comanda PRINT la PRN sau LPT1 (ambele folosesc portul LPT1)
+
+	Comanda NPRINT are avantajul fata de PRINT ca dispune de unele
+optiuni care fac utilizarea in prealabil a comenzii CAPTURE optionala.
+De exemplu:
+
+	NPRINT EX.TXT QUEUE=LASER1 NB NFF NT
+
+Daca nu se specifica nici o optiune, se folosesc setarile implicite.
+Optiunile mai importante a lui NPRINT sunt:
+
+NOTIFY, NB, NFF, NT, QUEUE=nume_coada, JOB=nume_serviciu
+
+
+
+		Listarea si stergerea serviciilor de listare
+
+	Utilizatorii obisnuiti pot lista serviciile, pe cand operatorii 
+cozii pot sa si stearga serviciile.
+	In acest scop se parcurg urmatorii pasi:
+1. se lanseaza PCONSOLE
+2. se selecteaza optiunea "Print Queue Information"
+3. se selecteaza o coada din lista de cozi
+4. se selecteaza optiunea "Current Print Job Entries". Se va afisa lista
+de servicii din coada selectata. Primul serviciu este cel care se listeaza
+primul.
+5. se selecteaza un serviciu
+6. pentru a-l sterge se apasa tasta Del. Se poate sterge si primul
+serviciu, cu confirmare.
+
+	Examinarea si modificarea starii serviciilor de listare
+
+	Toti utilizatorii pot examina serviciile, iar cei operatori de
+coada pot modifica starea serviciilor.
+	Pentru a examina starea serviciilor se parcurg urmatorii pasi:
+1. se lanseaza PCONSOLE
+2. se selecteaza "Print Queue Information"
+3. se selecteaza o coada din lista
+4. se selecteaza "Current Print Job Entries"
+5. se selecteaza un serviciu din lista de servicii a cozii selectate la
+punctul 3.
+6. daca serviciul nu este in curs de listare se pot modifica unele campuri
+
+	Campurile care pot fi modificate sunt:
+User Hold - daca se pozitioneaza pe Yes serviciul nu va fi listat pana
+cand optiunea se va pune pe No. Campul poate fi modificat de utilizatorul
+cozii
+
+Operator Hold - daca se pozitioneaza pe Yes serviciul nu va fi listat pana
+cand optiunea se va pune pe No. Campul poate fi modificat de operatorul cozii
+
+Service Sequence - prioritatea serviciului in cadrul cozii
+
+Number of copies - numarul de copii
+
+File Contents - specifica cum se va trata fisierul ca Byte Stream (nu
+converteste Tab-urile in spatii) sau ca un text (un Tab este
+convertit la numarul de spatii indicat de optiunea Tab Size)
+
+Tab Size - specifica numarul de spatii cu care va fi inlocuit un Tab
+
+Suppress form feed - daca este pozitionat pe Yes nu se transmite
+trecere la pagina noua la terminarea listarii unui serviciu de
+listare
+
+Notify when done - daca este pozitionat pe Yes utilizatorul este
+atentionat la terminarea listarii
+
+Form - se specifica un format de listare care a fost definit cu
+PRINTDEF
+
+Print Banner - daca este pozitionat pe Yes se va lista un antet la
+inceputul fiecarei pagini
+
+Name - daca se listeaza un antet, numele specificat la aceasta
+optiune va fi trecut la campul name
+
+Defer printing - listarea va fi amanata pana la data si ora
+specificate in Target date si Target time
+
+
+                Programarea serviciilor in cazul amanarii listarii
+
+        Daca se doreste listarea unui serviciu lung, el poate fi
+amanat pana la o anumita data si ora. Serviciile pot fi intrerupte si
+pornite oricand. 
+        Serviciul nu va fi listat pana cand nu se specifica
+intarzierea listarii cu PRINTCON. Se va configura o coada care sa
+accepte servicii dar sa nu le listeze pana cand nu se specifica o zi
+si ora cu PRINTCON. La sfarsit se elibereaza coada, adica orice
+serviciu care ii este trimis va fi listat neconditionat. 
+        Pentru a realiza acest lucru (utilizatorul trebuie sa fie
+operator de coada) se parcurg urmatorii pasi:
+1. se lanseaza PCONSOLE
+2. se selecteaza optiunea "Print Queue information"
+3. se selecteaza o coada din lista
+4. se selecteaza optiunea "Current Queue Status"
+5. se pozitioneaza pe No optiunea "Servers can service entries in
+queue"
+6. se paraseste PCONSOLE
+7. se porneste listarea serviciului cu CAPTURE sau NPRINT
+8. se lanseaza PCONSOLE
+9. se selecteaza optiunea "Print Queue Information"
+10. se selecteaza coada oprita din lista de cozi
+11. se selecteaza optiunea "Current Print Job Entries"
+12. se selecteaza serviciul care va fi intarziat
+13. se pozitioneaza campul "Defer printing" pe Yes
+14. se introduce data si ora la care se doreste listarea serviciul
+15. se apasa tasta Esc de 2 ori pentru a reveni la optiunea "Print
+Queue Information"
+16. se selecteaza optiunea "Current Queue Status"
+17. se pozitioneaza pe Yes campul "Servers can service entries in
+queue"
+
+
+                Controlul imprimantelor
+
+        Pentru a putea controla imprimantele conectate la print server
+se foloseste programul PCONSOLE, cu drept de operatori de print
+server. Se vor parcurge urmatorii pasi:
+1. se lanseaza PCONSOLE
+2. se selecteaza optiunea "Print Server Information"
+3. se selecteaza print server-ul dorit
+4. se selecteaza optiunea "Print Server Status/Control"
+5. se selecteaza "Printer Status"
+6. se selecteaza imprimanta dorita
+7. se va afisa starea imprimantei si o lista cu comenzi de
+imprimanta:
+Abort print job - opreste serviciul in curs de listare si il sterge
+din coada
+Form Feed - trimite la imprimanta o trecere la pagina noua
+Mark top of form - listeaza o linie de "*" la intalnirea unui format
+de listare
+Pause printer - opreste temporar listarea. Daca print server-ul este
+repornit intre timp, listarea nu este afectata, ea se va continua de
+unde a ramas
+Rewind printer - reporneste listarea de la inceput sau cu un numar de
+octeti in spate sau in fata
+Start printer - porneste imprimanta daca a fost oprita
+Stop printer - opreste listarea si pune serviciul la capatul cozii.
+Cand se reporneste listarea se va lista primul serviciu din coada
+
+
+                Instalarea imprimantei si definitii de format
+
+
+        Pe retea definirile imprimantei sunt corelate cu configurarea
+serviciilor de listare pentru simplificarea listarii. Definirile de
+imprimanta contin diferite informatii despre imprimantele care pot fi
+conectate in retea. Acestea pot fi intalnite in fisierele *.PDF din
+directorul PUBLIC. Ele sunt administrate si modificate cu ajutorul
+programului PRINTDEF.
+        Dupa ce definirile au fost facute, se pot configura
+serviciile de listare. Cu programul PRINTDEF pot fi create diferite
+formate standard care se vor utiliza in programul PRINTCON.
+        Pasii care trebuie parcursi sunt:
+1. se lanseaza PRINTDEF
+2. se selecteaza optiunea "Print Devices"
+3. se selecteaza optiunea "Import Print Devices"
+4. se specifica calea SYS:PUBLIC. Se va afisa o lista cu imprimantele
+predefinite
+5. se selecteaza o imprimanta din lista
+6. se revine cu Esc
+7. se selecteaza optiunea Form
+8. se apasa tasta Ins
+9. se introduc urmatoarele informatii:
+
+Name    Standard
+Number  0
+Length  0
+Width   0
+
+10. se paraseste programul
+
+        Definirile de imprimanta pot fi modificate cu optiunea "Edit
+Print Devices" din PRINTDEF. Formatul cu numarul 0 va fi implicit,
+deci el trebuie sa existe. Numele formatului nu are importanta, iar
+lungimea si latimea nu au efect la listare.
+
+                Crearea unei configurari de serviciu implicit
+
+        O configurare consta in specificarea optiunilor utilizate de
+CAPTURE si NPRINT. Ele sunt valabile daca comenzile CAPTURE si NPRINT
+nu folosesc optiuni in linia de comanda.
+        Pentru a configura un serviciu de listare pentru imprimanta LASER1
+se parcurg urmatorii pasi:
+1. se lanseaza PRINTCON
+2. se selecteaza optiunea "Edit Print Job Configuration"
+3. se apasa tasta Esc
+4. se specifica numele imprimantei - LASER1
+5. se seteaza optiunile pentru imprimanta. La campul Form se va completa
+automat formatul STANDARD setat cu PRINTDEF
+6. se salveaza cu Esc
+7. se apasa tasta Esc pana cand se ajunge in meniul "Available Options"
+8. se selecteaza optiunea "Select Default Print Job Configuration"
+9. se apasa Enter pe LASER1. In acest moment apare (default) in dreptul
+numelui imprimantei
+10. se paraseste programul cu salvarea configuratiei
+
+        Din acest moment la utilizarea comenzilor CAPTURE si NPRINT fara
+optiuni, se vor folosi setarile din formatul implicit. 
+
+
+                Crearea si utilizarea configuratiilor aditionale
+
+        Pentru a configura un serviciu de listare landscape pentru imprimanta
+LASER1 se parcurg urmatorii pasi:
+1. se lanseaza PRINTCON
+2. se selecteaza optiunea "Edit Print Job Configurations"
+3. se apasa tasta Ins
+4. se introduce numele - LASER1_L. se va deschide o fereastra cu campurile ce
+trebuie setate
+5. se selecteaza campul "Device Function", se alege valoarea Letter landscape,
+45lpp, 12cpi
+6. se salveaza cu Esc
+7. se paraseste programul cu salvare
+
+        Pentru a testa setarile se introduce comanda:
+
+NPRINT F:\AUTOEXEC.BAT J=LASER1_L
+
+
+
+                Copierea configurarilor 
+
+        Definirile si configurarile sunt salvate in directorul din MAIL al
+utilizatorilor. Utilizatorii vor avea accces doar la definirile si
+configurarile care apar la ei in director. 
+        Pentru a le copia se parcurg pasii:
+1. conectarea in retea se va face ca supervisor
+2. se lanseaza PRINTCON
+3. se selecteaza optiunea "Copy Print Job Configuration"
+4. se introduce identificatorul utilizatorului sursa
+5. se introduce identificatorul utilizatorului destinatie
+
+        Utilizatorul destinatie poate modifica definirile si configurarile
+copiate. 
+
+
+                Listarea rapoartelor afisate pe ecran la imprimanta
+
+        Se vor parcurge urmatorii pasi:
+1. se lanseaza comanda CAPTURE cu optiunile dorite
+2. se introduce comanda
+
+        NDIR *.DOC /UPDATE NOT AFTER 5.01.1994 SUB C > PRN:
+
+Operatorul ">" redirecteaza iesirea spre imprimanta. Pentru a redirecta catre
+LPT2 sau LPT3 se va folosi optiunea L=2 sau L=3 in CAPTURE. Iesirea poate fi
+redirectata si catre un fisier, daca PRN este inlocuit cu calea si numele
+fisierului.
+        Optiunea C a lui NDIR forteaza generarea unei iesiri fara intreruperi.
+Fara aceasta optiune NDIR se opreste dupa afisarea a 24 de linii,
+continuandu-se prin apasarea unei taste. Pe ecran nu se va afisa nimic. De
+aceea se recomanda utilizarea repetata a comenzii cu si fara redirectare. 
+
+

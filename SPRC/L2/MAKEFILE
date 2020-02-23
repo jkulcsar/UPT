@@ -1,0 +1,27 @@
+#
+
+MYLIB	= 
+LIBS	=
+CFLAGS	= -O
+
+#
+# Internet stream version (TCP protocol).
+#
+
+miniftp:	miniftps miniftpc
+
+netrw.o ftpcli.o ftpserv.o err.o: inet.h err.h miki.h netrw.h
+
+miniftps:	tcpserv.o ftps.o err.o netrw.o
+		gcc $(CFLAGS) -o $@ netrw.o tcpserv.o ftps.o err.o $(MYLIB) $(LIBS)
+
+miniftpc:	tcpcli.o ftpc.o err.o netrw.o
+		gcc $(CFLAGS) -o $@ netrw.o tcpcli.o ftpc.o err.o $(MYLIB) $(LIBS)
+
+clean:
+	-rm -f *.o core a.out temp*.* \
+		tcpserv tcpcli udpserv udpcli \
+		sppserv sppcli idpserv idpcli \
+		unixstrserv unixstrcli unixdgserv unixdgcli \
+		s.unixdg s.unixstr \
+		sockopt hostent

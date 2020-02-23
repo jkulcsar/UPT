@@ -1,0 +1,46 @@
+
+ #include "settings.dat"
+
+ #define MARGINE 8
+
+ class general_window : settings
+ {
+   private:
+
+   //----------------------  Variabile membru  ----------------------------
+
+     int      x,y,dx,dy;         // Coordonatele ferestrei
+
+     void   * store_image;       // Pointer la imaginea peste care
+				 // urmeaza a fi desenata fereastra
+
+     int      image_size;	 // Lungimea in octeti a zonei de mai sus
+
+     char   * window_name;	 // Pastreaza numele ferestrei
+
+     int      name_size;	 // Lungimea numelui ferestrei
+				 // (in caractere)
+
+   //-------------------------  Metode  -----------------------------------
+
+     void     set_xy( void );    // Initializeaza coordonatele ferestrei
+
+     void     get_image( void ); // Salvare imagine de sub fereastra
+
+     void     draw_window( void );  // Deseneaza fereastra
+
+     int      bad_coord( int,int,int,int );      // Verifica coord.
+
+   protected:
+
+     void     my_settings( int,int );	 // Seteaza caract. de lucru
+
+     settings::get_settings;
+     settings::put_settings;
+
+   public:
+
+     void     create_window( char *, int,int,int,int );
+     void     destroy_window( void );
+
+ };

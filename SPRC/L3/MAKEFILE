@@ -1,0 +1,27 @@
+#
+
+MYLIB	= 
+LIBS	=
+CFLAGS	= -O
+
+#
+# Internet stream version (TCP protocol).
+#
+
+db:	dbserv dbcli
+
+netrw.o dbc.o dbserv.o err.o tcpserv.o tcpcli.o map.o: inet.h err.h miki.h map.h netrw.h
+
+dbserv:		tcpserv.o dbs.o err.o map.o netrw.o
+		gcc $(CFLAGS) -o $@ netrw.o map.o tcpserv.o dbs.o err.o $(MYLIB) $(LIBS)
+
+dbcli:		tcpcli.o dbc.o err.o netrw.o
+		gcc $(CFLAGS) -o $@ netrw.o tcpcli.o dbc.o err.o $(MYLIB) $(LIBS)
+
+clean:
+	-rm -f *.o core a.out temp*.* \
+		tcpserv tcpcli udpserv udpcli \
+		sppserv sppcli idpserv idpcli \
+		unixstrserv unixstrcli unixdgserv unixdgcli \
+		s.unixdg s.unixstr \
+		sockopt hostent

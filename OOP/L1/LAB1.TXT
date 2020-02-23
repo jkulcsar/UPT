@@ -1,0 +1,119 @@
+
+                        LABORATOR   1
+                        -------------
+
+
+        Principalele concepte ce stau la baza OOP sunt:
+- incapsularea - contopirea datelor cu codul in CLASE, ceea ce duce
+la localizarea erorilor si modularizarea problemei de rezolvat.
+- mostenirea - in urma definirii unei clase se pot preciza seturi de
+clase asemanatoare avind totusi o trasatura distinctiva.
+- polimorfism - intr-o ierarhie de clase obtinute prin mostenire, o
+metoda poate avea forme diferite de la un nivel la altul.
+
+        Intrari si iesiri
+        -----------------
+        C++ inlocuieste functiile printf si scanf cu functiile cin si
+cout care nu necesita specificarea formatelor.
+
+        cin >> variabila
+        cout << "sir de caractere" << variabila
+
+Header-ul bibliotecii de stream-uri este "iostream.h". Un STREAM este
+un concept abstract care inglobeaza orice flux de date de la o sursa
+la o destinatie. Concret, stream-urile reprezinta totalitatea
+modalitatilor de realizare a unor operatii de citire sau scriere.
+Operatorul >> are semnificatia de "pune la ...", iar << are semnificatia
+de "preia de la ...".
+
+Exemplu:
+
+	#include <iostream.h>
+
+	void main(void)
+	  {
+	  int a;
+	  float b;
+	  char c;
+
+	  cout << "\n\nTastati un intreg : ";
+	  cin >> a;
+	  cout << "\nTastati un numar real : ";
+	  cin >> b;
+	  cout << "\nTastati o litera : ";
+	  cin >> c;
+	  cout << "\n\nAti tastat " << a << ", " << b << ", " << c << ".\n";
+	  }
+------
+Tema 1
+------
+        Sa se scrie un program care preia de la tastatura
+informatiile : nume, prenume, virsta, inaltimea si greutatea unei
+persoane. Dupa preluare sa se afiseze aceste informatii.
+
+
+        Supraincarcarea functiilor. Functii cu parametrii impliciti
+        -----------------------------------------------------------
+
+        Se pot utiliza mai multe functii cu acelasi nume.
+Identificarea lor se face prin numarul de parametri si tipul lor.
+
+	La apelul unei functii cu valori implicite se poate omite
+specificarea parametrilor efectivi pentru acei parametri formali care
+au declarate valori implicite.
+        Valorile implicite se specifica o singura data in prototip
+sau definitie (de obicei in prototip).
+        Argumentele cu valori implicite trebuie sa fie plasate la
+sfirsitul listei.
+
+Sa se modifice urmatorul program astfel incit el sa fie functional.
+Ex:
+---
+   #include <iostream.h>
+
+   void functie(int a=123, double b, double c=123.456, char *s="prg")
+   {
+     cout << "\n a=" << a << " b=" << b << " c=" << c << " s=" << s;
+   }
+
+   void main(void)
+   {
+   functie(456, 4.5, 1.4, "apel 1");
+   functie(456, 4.5, 1.4);
+   functie(456, 4.5);
+   functie(456.5);
+
+   }
+
+------
+Tema 2
+------
+        Sa se scrie un program care calculeaza produsul a doua numere
+reale si complexe. Functiile de calcul al produselor vor avea acelasi
+nume si parametri diferiti.
+
+
+	NEW si DELETE
+	-------------
+        In C++, pentru alocarea dinamica de memorie pot fi folositi
+doi operatori creati special pentru acest scop, care inlocuiesc
+familiile de functii "free" si "malloc". Operatorul NEW este folosit
+pentru alocarea dinamica a memoriei, iar operatorul DELETE pentru
+eliberarea ei.
+        Operatorul "new" returneaza un pointer la zona de memorie
+alocata dinamic, si NULL daca alocarea esueaza. Operatorul "delete"
+va elibera zona de memorie la care pointeaza argumentul sau.
+
+
+        Transferul prin referinta
+        -------------------------
+        O referinta reprezinta de fapt numele unui obiect. Daca avem
+tipul de data "D", prin "D&" se intelege o referinta la un obiect de
+tipul "D". Orice referinta trebuie initializata, devenind un "alias"
+(un alt nume) al obiectului cu care a fost initializata. In functii
+nu va mai fi transmisa intreaga structura, ci doar adresa ei. Membrii
+structurii se refera prin ".". In cazul utilizarii referintelor se
+lucreaza direct asupra obiectului referit.
+
+        REFERINTA NU ESTE UN POINTER LA OBIECTUL REFERIT! 
+

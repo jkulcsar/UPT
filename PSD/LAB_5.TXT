@@ -1,0 +1,293 @@
+Programarea Sistemelor de Conducere Distribuita
+
+			LABORATOR 5
+
+		Crearea fisierului LOGIN SCRIPT al
+			unui utilizator
+
+	Pentru a crea un fisier login script al unui utilizator se
+parcurg urmatorii pasi:
+1. conectarea in retea se face printr-un utilizator cu drept de
+modificare a fisierului login script
+2. se lanseaza SYSCON
+3. se selecteaza optiunea "User Information"
+4. se selecteaza utilizatorul a carui login script se va edita
+5. se selecteaza optiunea "Login Script"
+6. daca utilizatorul nu are un fisier login script se da
+posibilitatea copierii fisierului login script al altui utilizator.
+In acest caz se specifica numele utilizatorului de la care se va
+copia fisierul login script. 
+   daca utilizatorul are un fisier login script se intra automat in
+editarea acestuia
+
+		Utilizarea variabilelor login script
+
+	O variabila este un nume dat de calculator unei date. La
+conectare, se incarca variabilele cu informatiile despre utilizator,
+data, ora, etc. Aceste informatii pot fi utilizate in cadrul
+fisierelor login script.
+	Pentru a obtine valoarea unei variabile in cadrul fisierului
+login script ea trebuie scrisa cu litere mari si precedata de semnul
+"%". Daca semnul "%" lipseste se foloseste numele varioabilei ca
+atare ceea ce poate duce la erori.
+De exemplu:
+
+	MAP INSERT S2:=SYS:PUBLIC\%MACHINE\%OS\%OS_VERSION
+
+- MACHINE are valoarea setata in fisierul de configurare a statiei de
+lucru SHELL.CFG. Daca nu este setata pe nici o valoare este implicit
+egala cu IBM_PC
+- OS contine numele sistemului de operare, de obicei MS-DOS
+- OS_VERSION contine versiunea de DOS care a fost incarcata pe statia
+de lucru
+
+In continuare se prezinta o lista cu variabilele mai des folosite in
+fisierele login script:
+
+Variabila login 	Explicatie
+--------------------------------------------------------------------
+DAY			numarul zilei curente (01-31)
+DAY_OFF_WEEK		numele zilei curente (Sunday-Saturday)
+MONTH			numarul lunii curente (01-12)
+MONTH_NAME		numele lunii curente (January-December)
+NDAY_OF_WEEK		numarul zilei saptamanii (1-7)
+			(Sunday = 1)
+SHORT_YEAR		anul curent prescurtat (94)
+YEAR			anul curent (1994)
+HOUR			ora curenta (1-12)
+HOUR24			ora curenta (00-23)
+MINUTE			minutul curent (00-59)
+SECOND			secunda curenta (00-59)
+AM_PM			zi sau noapte
+GREETING_TIME		Morning, afternoon, evening
+NETWORK_ADDRESS		adresa de retea (8 cifre hexa)
+P_STATION		adresa de nod (12 cifre hexa)
+FULL_NAME		numele intreg al utilizatorului curent
+LOGIN_NAME		numele utilizatorului curent
+USER_ID			identificatorul utilizatorului curent
+MEMBER OF "group"	TRUE daca utilizatorul este membru al
+			grupului specificat si FALSE daca nu este
+			membru
+
+	Variabilele login script sunt utile la folosirea unor
+comenzi pentru mai multi utilizatori. De exemplu:
+
+	MAP H:=SYS\HOME\%LOGIN_NAME
+
+- daca fiecare utilizator are un director, care are acelasi nume cu
+utilizatorul, in directorul HOME de pe volumul SYS, comanda
+anterioara va fi valabila pentru toti utilizatorii
+
+		Utilizarea comenzii IF in cadrul fisierelor
+			login script
+
+	Exemple de situatii in care se foloseste comanda IF sunt:
+- daca un utilizator este membru al unui grup
+- daca o variabila are o valoare data
+- afisarea unui mesaj in functie de indeplinirea primelor doua conditii
+
+De exemplu:
+
+	IF DAY_OF_WEEK ="Friday" THEN WRITE "Don't forget ..."
+
+	Daca variabila este folosita in partea de conditie ea nu
+trebuie precedata de caracterul "%". "Friday" este un sir de
+caractere care nu este identic cu "friday". Deci in cadrul sirurilor
+de caractere se tine cont daca sunt caractere mari sau mici.
+	Conditia din comanda consta din 3 parti:
+1. variabila care este testata
+2. testul care se aplica
+3. valoarea cu care se testeaza variabila
+
+Testul care se aplica poate fi:
+- egalitate: =, ==, IS, EQUALS
+- diferit: !=, <>, IS NOT, DOES NOT EQUAL, NOT EQUAL TO
+- inversarea unei conditii: NOT
+- mai mare: >
+- mai mic: <
+- mai mare sau egal: >=
+- mai mic sau egal: <=
+- se pot folosi operatorii AND sau OR pentru a lega mai multe
+conditii intre ele
+
+De exemplu:
+		IF DAY_OF_WEEK="Friday" THEN
+		WRITE"Don't forget ...."
+		ELSE
+		WRITE"Have a nice day"
+		END
+
+Folosirea lui END este obligatorie daca exista ramura de ELSE, altfel
+nu.
+
+Cuvantul cheie VALUE forteaza comparatii de valori nu de siruri de
+caractere. De exemplu:
+
+	IF VALUE DAY < "7" THEN
+	WRITE"Don't forget..."
+	END
+
+Reprezentarea in cadrul calculatorului a lui "5" este diferita fata
+de 5. Compararile de siruri de caractere se fac in ordine alfabetica. 
+
+	Daca pe ramura adevarata a lui IF trebuie sa se execute mai
+multe comenzi, acestea vor fi plasate intr-un bloc marginit de BEGIN
+si END astfel:
+
+	IF MEMBER OF "RETEA" THEN BEGIN
+	MAP J:=SYS:WORK\SURSE\RETELE
+	WRITE"Programarea Sistemelor Distribuite"
+	ELSE
+	WRITE"Alta materie"
+	END
+
+		Utilizarea variabilelor login script in DOS
+
+	De multe ori variabilele login script sunt utile in cadrul
+unor comenzi DOS. Pentru a realiza comunicarea intre fisierul login
+script si DOS, se foloseste in cadrul fisierului login script comanda
+DOS SET astfel:
+
+	DOS SET variabila_dos="sir de caractere"
+
+De exemplu daca se doreste memorarea numelui utilizatorului curent se
+foloseste comanda:
+
+	DOS SET USERID="%LOGIN_NAME"
+
+sirul de caractere trebuie plasat intotdeauna intre "". Utilizarea
+caracterului "%" in cadrul sirului de caractere duce la accesarea
+unei variabile login.
+	Dimensiunea alocata variabilelor de mediu este setata la
+resetarea statiei. Ea trebuie setata pe o valoare suficient de mare
+astfel incat sa poata retine variabilele de mediu stabilite de
+utilizator.
+
+De exemplu: se considera situatia in care la resetare trebzuie
+incarcata configuratia corespunzatoare placii grafice din statie. 
+Salvarea adresei de retea a statiei se face plasand o comanda de
+forma:
+
+	DOS SET PST="%NETWORK_ADDRESS"
+
+in login script.
+	Ea poate fi utilizata intr-un fisier de comenzi astfel:
+
+IF "%PST%"=="0000D03E123A" GOTO MONO
+IF "%PST%"=="000000000015" GOTO CGA
+IF "%PST%"=="0000D03F245C" GOTO VGA
+GOTO EXIT
+:VGA
+REM comenzi referitoare la un monitor VGA
+GOTO EXIT
+:CGA
+REM comenzi referitoare la un monitor CGA
+GOTO EXIT
+:MONO
+REM comenzi referitoare la un monitor MONO
+:EXIT
+
+
+		Comenzi utilizate in login script
+
+1. Controlul literelor de drive  MAP
+				 DRIVE
+
+	- MAP poate fi utilizat la fel cum a fost prezentat in
+laboratorul 1
+
+	- DRIVE se pune dupa lista de comenzi MAP. Implicit, dupa
+executia fisierului login directorul curent este primul drive al
+retelei(de regula F:). Pentru a seta alt director se foloseste
+comanda DRIVE astfel:
+	
+		DRIVE litera:
+
+litera poate fi asignata prin MAP, sau una existenta
+
+		DRIVE *numar:
+
+numar reprezinta numarul asignarii din lista de comenzi MAP
+
+
+2. Afisarea informatiilor WRITE
+			  DISPLAY
+			  FDISPLAY
+
+	- WRITE "sir de caractere" - in cadrul sirului se pot utiliza
+variabile login script precedate de caracterul "%". Daca sirul este
+mai lung se vor utiliza mai multe comenzi WRITE. Pentru a se scrie pe
+ecran pe aceeasi linie se pune la sfarsitul liniei caracterul ";"
+
+		WRITE "sir1";
+		WRITE "sir2"
+In cadrul sirului pot fi folosite urmatoarele:
+\r - trece cursorul in prima coloana
+\n - trece cursorul pe linie noua
+\" - afiseaza caracterul "
+\7 - produce un sunet
+
+	- DISPLAY cale\fisier  
+	- FDISPLAY cale\fisier - afiseaza pe ecran continutul
+fisierului specificat. Diferenta intre ele consta in faptul ca
+FDISPLAY afiseaza doar liniile de text eliminind caracterele de
+format.In cadrul fisierelor se vor utiliza PAUSE sau WAIT pentru a
+ramane afisate pe ecran pana cand utilizatorul apasa o tasta.
+
+3. Executia programelor externe #
+				EXIT
+
+	- # lanseaza un program si la incheierea acestuia se intoarce
+in login script. Nu pot fi lansate programe rezidente. Sefoloseste
+pentru programele executabile(*.EXE si *.COM).
+
+		# F:\WORK\WP51\WP
+
+Fisierele *.BAT si comenzile DOS se lanseaza astfel: intai se
+lanseaza COMMAND.COM cu parametrul /C, apoi se specifica fisierul sau
+comanda.
+
+		# COMMAND.COM /C DIR F:
+		# COMMAND.COM /C cale\nume_bat.BAT
+
+	-EXIT are 2 utilitati: sa opreasca executia lui login script
+			       sa paraseasca fisierul pentru a
+			       executa alta comanda
+
+Daca este utilizat fara comanda, EXIT opreste executia fisierului si
+il paraseste. Daca este pus la sfarsitul login script-ului de sistem
+nu se va mai executa nici un login script de utilizator
+Comanda:
+		EXIT "nume program" 
+paraseste executia login script-ului si lanseaza programul
+specificat. In acest mod pot fi lansate si meniuri astfel:
+	
+		EXIT "MENU nume meniu" 
+
+4. Controlul functiilor DOS - DOS BREAK
+			      DOS SET
+			      DOS VERIFY
+			      COMSPEC
+
+	- DOS BREAK ON/OFF - daca este pozitionat pe ON utilizatorul
+poate intrerupe cu Ctrl-Break orice comanda chiar si pe cea de
+copiere
+	- DOS VERIFY ON/OFF - pozitionat pe ON determina ca orice
+scriere pe disc sa fie urmata de o citire
+	- COMSPEC - utilizat pentru gasirea procesorului de comenzi
+
+5. Controlul in cadrul executiei - BREAK
+				   IF
+				   THEN
+				   PAUSE
+				   WAIT
+
+6. Comantarii - linia de comentariu trebuie precedata de:
+	- REMARK
+	- REM
+	- ;
+
+7. Producerea unor sunete - FIRE PHASERS numar TIMES
+		
+		
+

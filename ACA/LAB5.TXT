@@ -1,0 +1,15 @@
+sursa	ds.w  $100
+dest	ds.w  $100
+n	equ   #100
+pp	lea.w  n,D0
+	lea.w sursa,A1
+	lea.w dest,A2
+	bsr sub
+sub	move.w (A1),(A2)
+	sub (D0),2
+	tst.w (D0)
+	bne sub
+	rts
+	s
+	end
+	

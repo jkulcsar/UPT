@@ -1,0 +1,213 @@
+
+		LABORATOR 1
+		-----------
+
+	Comanda MAP
+	-----------
+
+	Cu ajutorul comenzii MAP utilizatorii pot referi cai lungi
+folosind o singura litera. MAP-arile obisnuite incep de la litera F a
+alfabetului pina la litera Q. MAP-arile de cautare incep de la litera
+Z si continua spre inceputul alfabetului.
+
+Sintaxa comenzii MAP:
+
+	MAP litera:=nume_file_server\nume_volum:cale
+
+unde calea este structura de directoare dorita
+
+De exemplu:
+
+	MAP M:=SYS:WORK\SURSE
+
+Dupa executia comenzii M: se trece in directorul specificat in cale
+
+	Comanda utilizata fara optiuni produce afisarea MAP-arilor
+curente. De obicei literele de la A: la E: sint rezervate unitatilor
+locale. Ultima litera poate fi influentata folosind o comanda
+LASTDRIVE in fisierul CONFIG.SYS al statiei de lucru astfel:
+
+	LASTDRIVE = C
+
+Reteaua incepe asignarile de la litera D: pe care o asociaza automat
+directorului SYS:LOGIN. Comanda mai are efectul de a pune la
+dispozitie pentru asignari inca doua litere. De obicei se prefera sa
+se configureze toate statiile de lucru la fel.
+
+	Odata fixata o MAP-are ea poate fi prelungita cu ajutorul
+comenzii DOS CD, sau cu o noua comanda MAP. 
+
+-Cu ajutorul comenzii DOS CD o MAP-are se prelungeste astfel:
+
+F:\LOGIN> MAP H:=SYS:WORK\SURSE
+F:\LOGIN> H:
+H:\WORK\SURSE> CD LNIOA
+H:\WORK\SURSE\LNIOA>
+
+Din acest moment litera H: va fi asignata unei noi cai:
+
+	Drive H: = FILE-SERVER\SYS:  \WORK\SURSE\LNIOA
+
+	O comanda CD .. folosita in acest moment poate reface
+MAP-area initiala. 
+
+
+-Cu ajutorul comenzii MAP o MAP-are se prelungeste astfel:
+
+F:\LOGIN> MAP H:=SYS:WORK\SURSE
+F:\LOGIN> H:
+H:\WORK\SURSE> MAP LNIOA
+
+Din acest moment litera H: va fi asignata unei noi cai:
+
+	Drive H: = FILE-SERVER\SYS:  \WORK\SURSE\LNIOA
+
+
+	Uneori este de preferabil ca utilizatorii sa nu aiba acces in 
+radacina. In aceste cazuri se foloseste optiunea ROOT a comenzii MAP. 
+
+	MAP ROOT H:=SYS:WORK\SURSE
+
+	Aceasta are ca efect asignarea literei H: o radacina falsa
+ceea ce nu mai permite accesul in directoarele parinte. Deci nu se
+poate utiliza o comanda DOS CD ..
+
+De exemplu:
+
+F:\LOGIN> MAP ROOT H:=SYS:WORK\SURSE
+F:\LOGIN> H:
+H:>
+
+	Se observa ca sistemul crede ca litera H: a fost asignata
+radacinii. O listare a asignarilor curente va afisa pentru litera H:
+urmatoarea linie:
+
+	Drive H: = FILE_SERVER\SYS:\WORK\SURSE	\
+
+Prin plasarea caii in stinga caracterului "\" MAP informeaza
+utilizatorul asupra faptului ca literei H: i s-a facut o asignare cu
+optiunea ROOT.
+
+	Pentru a sterge o asignare se foloseste optiunea DEL sau REM 
+a comenzii MAP astfel:
+
+	MAP DEL H:   sau   MAP REM H:
+
+	Pentru a asigna o litera caii curente se foloseste comanda
+astfel:
+
+	MAP litera:=
+
+	Pentru a egala doua asignari se foloseste comanda:
+
+	MAP litera1:=litera2
+
+din acest moment litera1 va indica aceeasi cale ca si litera2
+	
+	MAP-ari de cautare
+	------------------
+
+
+	Utilizatorul va asigna lui S1 pina la S16 MAP-arile de
+cautare. Sistemul va asocia fiecarei asignari o litera de la
+sfirsitul alfabetului.
+
+De exemplu:
+
+	MAP S1:=SYS:PUBLIC
+
+O listare a asignarilor curente va afisa astfel:
+
+	SEARCH1:   = Z:. [FILE-SERVER\SYS:   \PUBLIC]
+
+Daca lui S1 i-a fost asociata o alta cale, cea noua o va inlocui pe
+cea veche. 
+
+	La folosirea comenzii:
+
+	MAP S16:=SYS:DOS
+
+ar fi normal sa se asigneze ultimei cai de cautare. O listare a
+asignarilor curente va afisa astfel:
+
+	SEARCH1:   = Z:. [FILE-SERVER\SYS:   \PUBLIC]
+	SEARCH2:   = Y:. [FILE-SERVER\SYS:   \LOGIN]
+	SEARCH3:   = X:. [FILE-SERVER\SYS:   \DOS]
+
+Se observa ca noua cale de cautare a fost asignata primei cai de
+cautare disponibile. (s-a presupus ca S1 si S2 au fost asignate
+anterior)
+
+	Daca comanda MAP este utilizata cu optiunea INSERT, asignarea
+specificata va fi inserata prima in lista de asignari iar celelalte se
+vor renumerota.
+
+De exemplu: daca initial avem urmatoarele cai de cautare
+
+	SEARCH1:   = Z:. [FILE-SERVER\SYS:   \PUBLIC]
+	SEARCH2:   = Y:. [FILE-SERVER\SYS:   \LOGIN]
+	SEARCH3:   = X:. [FILE-SERVER\SYS:   \DOS]
+
+si introducem comanda:
+
+	MAP INSERT S1:=SYS:WORK
+
+noile cai de cautare vor fi listate astfel:
+
+	SEARCH1:.. = W:. [FILE-SERVER\SYS:   \WORK]
+	SEARCH2:   = Z:. [FILE-SERVER\SYS:   \PUBLIC]
+	SEARCH3:   = Y:. [FILE-SERVER\SYS:   \LOGIN]
+	SEARCH4:   = X:. [FILE-SERVER\SYS:   \DOS]
+
+Se observa ca desi caile au fost renumerotate, literele s-au pastrat.
+Noua cale va fi identificata prin litera W: care a fost urmatoarea
+litera disponibila.
+
+	Stergerea unei cai de cautare se face astfel:
+
+	MAP DEL S1:
+
+	Modificarea unei cai de cautare se face la fel ca si la caile
+obisnuite, folosind comanda DOS CD. Ea trebuie folosita cu grija
+pentru a nu distruge o cale utila. 
+
+De exemplu: daca avem urmatoarele cai de cautare:
+
+	SEARCH1:.. = W:. [FILE-SERVER\SYS:   \WORK]
+	SEARCH2:   = Z:. [FILE-SERVER\SYS:   \PUBLIC]
+	SEARCH3:   = Y:. [FILE-SERVER\SYS:   \LOGIN]
+	SEARCH4:   = X:. [FILE-SERVER\SYS:   \DOS]
+
+si introducem comenzile:
+
+F:\LOGIN>Z:
+Z:\PUBLIC>WHOAMI
+
+... efectul comenzii WHOAMI
+	
+Z:\PUBLIC>CD ..
+Z:\>WHOAMI
+
+Se va genera eroare deoarece programul de retea WHOAMI nu va fi gasit
+in radacina, iar calea de cautare pe directorul PUBLIC a fost
+distrusa cu comanda DOS CD..
+
+	Utilizarea unei MAP-ari de cautare fara optiunea INSERT duce
+la distrugerea unei cai dintr-o comanda PATH utilizata anterior.
+
+De exemplu: daca se introduce urmatoarea secventa de comenzi va fi
+distrusa prima cale din PATH:
+
+	PATH=F:\;F:\DOS;F:\UTIL;
+	MAP S1:=SYS:PUBLIC
+	PATH
+	PATH=S2:;F:\DOS;F:\UTIL;
+
+se observa ca prima cale a fost inlocuita cu S2:.
+Folosind optiunea INSERT se evita aceasta problema.
+
+	In cazul in care utilizatorul nu cunoaste prima litera
+disponibila pentru a fi asignata unei cai se poate utiliza optiunea
+NEXT a comenzii MAP astfel:
+
+	MAP NEXT F:\WORK

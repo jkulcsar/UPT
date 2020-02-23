@@ -1,0 +1,248 @@
+
+DERIVAREA CLASELOR
+------------------
+   Avind o clasa oarecare A se poate defini o alta clasa B care sa preia toate
+caracteristicile clasei A, la care se pot adauga altele noi, proprii clasei B.
+Clasa A se numeste clasa de baza, iar clasa B clasa derivata. Acesta este 
+mecanismul de mostenire. In declaratia clasei derivate nu mai apar 
+informatiile mostenite, ele fiind automat luate in considerare de catre 
+compilator. Nu mai trebuie rescrise functiile membru ale clasei de baza, ele 
+putind fi folosite in maniera in care au fost definite (dar ele pot fi si
+redefinite, avind o cu totul alta functionalitate).
+
+Exemplu: clasa "hard_disk_1" este derivata din clasa "floppy_disk"
+
+enum stare_operatie   { REUSIT, ESEC };
+enum stare_protectie_la_scriere  { PROTEJAT, NEPROTEJAT }
+
+class floppy_disk {
+  protected : 
+	// cuvantul cheie "protected" permite declararea unor membrii
+	// nepublici, care sa poata fi accesati de catre eventualele clase 
+	// derivate din "floppy_disk"
+     stare_protectie_la_scriere indicator_protectie;
+     int capacitate, nr_sectoare;
+  public :
+     stare_operatie formatare(void);
+     stare_operatie citeste_pista(int drive, int sector_de_start,
+				  int numar_sectoare, void *buffer);
+     stare_operatie scrie_pista(int drive, int sector _de_start,
+				int numar_sectoare, void *buffer);
+     stare_operatie protejeaza_la_scriere(void);
+};
+
+class hard_disk_1 : public floppy_disk {
+     int numar_partitii;
+   public :
+     stare_operatie parcheaza_disc(void);
+};
+
+stare_operatie hard_disk_1::parcheaza_disc(void)
+{
+    // CORECT: accesare membru "protected"
+    indicator_protectie = PROTEJAT;
+
+    //...
+    return REUSIT;
+}
+
+void functie(void)
+{ hard_disk_1 hd1;
+  hd1.formatare();  //CORECT
+  hd1.indicator_protectie = NEPROTEJAT;  //EROARE: incercare de accesare
+					 // a unui membru protejat
+}
+
+Prin enuntul:
+  class hard_disk_1 : public floppy_disk
+se indica compilatorului urmatoarele informatii:
+	- clasa "hard_disk_1" va fi DERIVATA din clasa "floppy_disk";
+	- toti membrii de tip "public" ai clasei "floppy_disk" vor fi mosteniti
+       (si deci vor putea fi folositi) ca "public" de catre clasa "hard_disk_1";
+	- toti membrii "protected" ai unui "floppy_disk" vor putea fi utilizati 
+	ca fiind "protected" in cadrul clasei "hard_disk_1"
+
+
+Declararea unei clase derivate:
+
+specificator_clasa nume_clasa_derivata
+[ :   [ modificator_acces_1 ] nume_clasa_baza_1
+ [ , [ modificator_acces_2 ] nume_clasa_baza_2 ]
+    [ , ... ]
+ ]
+]
+
+{
+ [ [private : ] lista_membri_1 ]
+ [ [protected : ]lista_membri_2 ]
+ [ [public : ]lista_membri_3 ]
+} [lista_obiecte];
+
+   In functie de tipul lui "specificator_clasa" ("class" sau "struct") 
+"modificator_clasa" va lua valoarea implicita private sau public. Rolul 
+acestui "modificator_acces" este ca impreuna cu specificatorii "public",
+"private" sau "protected" intalniti in cadrul declararii clasei de baza, 
+sa hotarasca dreptul de accesare a membrilor mosteniti de catre o clasa 
+derivata.
+   Tabelul urmator sintetizeaza drepturile de acccesare a membrilor
+unei clase derivate in functie de drepturile de accesare a membrilor
+clasei de baza si valoarea lui "modificator_acces".
+
+DREPT DE ACCES IN       MODIFICATOR DE      DREPT DE ACCES IN  
+  CLASA DE BAZA	           ACCES	     CLASA DERIVATA
+
+  PUBLIC                  PUBLIC	      PUBLIC
+  PRIVATE                 PUBLIC              inaccesibil
+  PROTECTED               PUBLIC              PROTECTED
+  PUBLIC		  PRIVATE	      PRIVATE
+  PRIVATE		  PRIVATE	      inaccesibil
+  PROTECTED		  PRIVATE	      PRIVATE
+
+   Cuvintul cheie "protected" nu poate fi folosit ca modificator de acces 
+in cadrul unei relatii de mostenire. Rolul sau se limiteaza la a permite 
+accesarea in cadrul unei clase derivate a membrilor ne-publici ai clasei 
+de baza. Functiile membre ale clasei derivate nu au acces la membrii privati 
+ai clasei de baza.
+   O alta observatie este aceea ca orice "friend" al unei clase derivate are 
+exact aceleasi drepturi si posibilitati de a accesa membrii clasei de baza 
+ca orice alt membru al clasei derivate.
+
+   class Employee
+   {
+   private:
+      char name[30];
+      //alte caracteristici:birthdate,social-security number,address
+   public:
+      Employee();
+      Employee( const char *nm );//cuvintul cheie const folosit dupa lista
+      char *getname() const;     //de parametri a unei functii declara functia
+      double computePay(void);   //membru ca si functie "read-only" care nu 
+                                 //modifica obiectul pentru care este apelata
+   };                             
+
+   class WageEmployee : public Employee
+   {
+   private:
+      double wage;
+      double hours;
+   public:
+      WageEmployee( const char *nm );
+      void setWage( double wg );
+      void setHours( double hrs );
+      double computePay(void);
+   };
+
+   class SalesPerson : public WageEmployee
+   {
+   private:
+      double commission;
+      double salesMade;
+   public:
+      salesPerson( const char *nm );
+      void setCommission( double comm );
+      void setSales( double sales );
+      double computePay(void);
+   };
+
+   class Manager : public Employee
+   {
+   private:
+      double weeklySalary;
+   public:
+      Manager( const char *nm );
+      void setSalary( double salary );
+      double computePay(void);
+   };
+
+Functia computePay() poate fi scrisa pentru diferitele tipuri de angajati :
+
+double WageEmployee::computePay() const
+{
+   return wage * hours;
+}
+
+double SalesPerson::computePay() const
+{
+   return WageEmployee::computePay() + commission * salesMade;
+}
+
+   Aceasta tehnica este folosita de obicei atunci cind se redefineste o 
+functie membru intr-o clasa derivata. Versiunea din clasa derivata apeleaza 
+versiunea din clasa de baza si apoi efectueaza celelalte operatii necesare.
+
+CONSTRUCTORII CLASELOR DERIVATE
+--------------------------------
+   O instantiere a unei clase derivate contine toti membrii clasei de baza si
+toti acestia trebuie initializati. Constructorul clasei de baza trebuie apelat
+de constructorul clasei derivate.
+
+//functie constructor pentru WageEmployee
+WageEmployee::WageEmployee( const char *nm ): Employee( nm )
+{
+   wage = 0.0;
+   hours = 0.0;
+}
+
+//functie constructor pentru SalesPerson
+SalesPerson::SalesPerson( const char *nm ): WageEmployee( nm )
+{
+   commission = 0.0;
+   salesMade = 0.0;
+}
+
+//functie constructor pentru Manager
+Manager::Manager( const char *nm ): Employee( nm )
+{
+   weeklySalary = 0.0;
+}
+
+Cind se declara un obiect dintr-o clasa derivata, compilatorul executa intii
+constructorul clasei de baza, apoi constructorul clasei derivate (daca clasa 
+derivata contine obiecte membru, constructorii acestora sint executati dupa 
+constructorul clasei de baza, dar inaintea constructorului clasei derivate).
+
+CONVERSII INTRE CLASA DE BAZA SI CLASA DERIVATA
+------------------------------------------------
+C++ permite conversia implicita a unei instantieri a clasei
+derivate intr-o instantiere a clasei de baza. De exemplu:
+
+WageEmployee aWorker;
+SalesPerson aSeller( "John Smith" );
+aworker = aSeller;  // conversie derived => base
+
+Se poate de asemenea converti un pointer la un obiect din clasa derivata 
+intr-un pointer la un obiect din clasa de baza.
+
+Conversia "derivat*"->"baza*" se poate face:
+IMPLICIT : daca "derivat" mosteneste pe "baza" in maniera publica;
+EXPLICIT : daca "derivat" mosteneste pe "baza" in maniera privata.
+
+Conversia "baza*"->"derivat*" nu poate fi facuta decit explicit, prin operatorul
+"cast".
+
+Cind se refera un obiect printr-un pointer, tipul pointerului determina care 
+functii membre pot fi apelate. Daca se refera un obiect din clasa derivata 
+printr-un pointer la clasa de baza, pot fi apelate doar functiile definite
+in clasa de baza. Daca se apeleaza o functie membru care este definita atit 
+de clasa de baza cit si de cea derivata, functia care este apelata depinde de
+tipul pointerului:
+
+double base, total;
+base = wagePtr->computePay();  // call WageEmployee::computePay()
+total = salePtr->computePay();  // call SalesPerson::computePay()
+
+  Conversia inversa trebuie facuta explicit:
+
+WageEmployee *wagePtr = &aSeller;
+SalesPerson *salePtr;
+salePtr = (SalesPerson *)wagePtr;
+
+Aceasta conversie este periculoasa, deoarece nu se poate sti cu
+certitudine la ce tip de obiect pointeaza pointerul la clasa de baza.
+  Problema care se pune este cum se poate calcula, de exemplu,
+salariul fiecarui angajat din lista. Dupa cum s-a mentionat anterior,
+functia apelata depinde de tipul pointerului, ca urmare este
+nesatisfacatoare apelarea fc. computePay() folosind doar pointeri la
+Employee. Este necesara apelarea fiecarei versiuni a fc. computePay()
+folosind totusi pointeri generici, lucru posibil folosind functii
+virtuale.

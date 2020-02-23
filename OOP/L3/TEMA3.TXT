@@ -1,0 +1,8 @@
+	Implementati o stiva de numere intregi (care este o structura de 
+date de tip LIFO - last-in, first-out), utilizind o clasa. Membrii variabila 
+ai clasei indica virful stivei si tabloul de intregi in care se retin elementele 
+stivei. Functiile membru ale clasei sunt:
+	- o functie pentru initializarea pointerului in stiva
+	- o functie pentru introducerea unei noi valori in stiva
+	- o functie pentru scoaterea unei valori din stiva;
+

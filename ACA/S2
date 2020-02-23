@@ -1,0 +1,20 @@
+sirp	dc.b  13
+	dc.b  'sir in Pascal'
+n	equ 5
+prog    
+	move.w #0,D0
+	move.w #0,D1
+	move.w #0,D2
+	lea sirp,A0
+	move.b (A0)+,D2
+	move.b #n,D1
+	subq #1,D1
+et	move.b (A0)+,D0
+	subq.b #1,D2
+	tst.b D2
+	beq et1
+	trap #15
+	ds.w 16
+	dbf.b D1,et
+et1	trap #15
+	dc.w 0	

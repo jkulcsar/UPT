@@ -1,0 +1,322 @@
+Programarea Sistemelor de Conducere Distribuita
+
+			LABORATOR 4
+
+		Modificarea parolei cu SETPASS
+
+	Programul se utilizeaza pentru a modifica parola unui
+utilizator. Daca utilizatorul este conectat simultan pe mai multe
+server-e, parolele de pe toate server-ele pot fi sincronizate cu
+ajutorul lui SETPASS.
+	Conectarea pe mai multe server-e simultan se face cu comanda
+ATTACH. 
+Pasii care se parcurg pentru a modifica parola sunt:
+1. utilizatorul se va conecta simultan pe toate server-ele pe care
+vrea sa-si modifice parola
+2. se lanseaza SETPASS
+3. se introduce vechea parola
+4. se introduce noua parola de doua ori pentru confirmarea ei
+5. daca se doreste ca noua parola sa inlocuiasca cele vechi de pe
+toate server-ele pe care este conectat utilizatorul se raspunde cu Y
+la intrebarea:
+
+Synchronize passwords on these file servers with server/utilizator
+
+Alegerea parolelor
+------------------
+
+	De obicei se aleg parole lungi, formate din combinatii de 
+litere si cifre fara un anumit sens. Parola poate contine doua
+cuvinte legate prin caractere ca "&", "_", ".".
+
+		Limitarea dimensiunii unui director
+			    cu DSPACE
+
+	Pentru a limita dimensiunea unui director la 1MB se parcurg
+urmatorii pasi:
+1. se lanseaza DSPACE
+2. se selecteaza optiunea "Directory Restrictions"
+3. se introduce calea completa a directorului a carui dimensiune se
+va limita
+4. se seteaza optiunea "Limit Space" pe Yes
+5. se specifica valoarea la care ar fi limitata dimensiunea 
+directorului in octeti (1024 = 1MB) la optiunea "Directory Space Limit"
+6. se salveaza cu Esc
+
+	Daca spatiul alocat unui director s-a umplut, utilizatorii nu
+mai pot salva informatii in directorul respectiv. In schimb ei pot
+sa-si salveze informatiile in alt loc pe volum. 
+	Limitarea dimensiunii unui director este valabila pentru toti
+utilizatorii indiferent de drepturile lor.
+
+		Limitarea spatiului alocat unui utilizator
+			cu DSPACE
+
+	NetWare 2.2 limiteaza spatiul alocat unui utilizator pe
+intreg server-ul, indiferent de numarul si dimensiunea volumelor
+existente pe server.
+	NetWare 3.11 are posibilitatea alocarii de spatii diferite 
+pentru un utilizator pe fiecare volum in parte.
+Pasii:
+1. se lanseaza DSPACE
+2. se selecteaza "User Restrictions"
+3. se selecteaza utilizatorul caruia i se va limita spatiul alocat
+4. se selecteaza volumul pe care utilizatorul va avea spatiu limitat
+(3.11)
+5. se seteaza optiunea "Limit Space" pe Y
+6. se specifica spatiul alocat in octeti. De exemplu: 2048 pentru 2MB
+
+		Utilizarea programului FILER
+
+	       	   Stergerea unui director
+
+	Pentru a putea sterge un director chiar daca acesta nu este
+gol se parcurg urmatorii pasi:
+1. se lanseaza FILER
+2. se seteaza directorul care va fi sters ca fiind cel curent cu optiunea
+"Select Current Directory"
+3. se selecteaza optiunea "Display Directory Contents"
+4. se sterge directorul. 
+
+		Modificarea atributelor de fisier
+		  si director utilizand FILER
+
+	Atributele nu trebuie stiute pe de rost deoarece FILER le va
+lista intotdeauna sub forma de meniu din care utilizatorul poate
+sa-si selecteze atributele dorite. Un dezavantaj a lui FILER este ca
+poate modifica atributele unui singur fisier/director la un moment dat. 
+Pentru modificarea atributelor mai multor fisiere/directoare se
+utilizeaza comenzile FLAG si FLAGDIR.
+	Pentru a modifica atributele unui fisier se parcurg urmatorii
+pasi:
+1. se lanseaza FILER
+2. se seteaza directorul curent cu optiunea "Select Current
+Directory"
+3. se afiseaza continutul directorului cu optiunea "Display Directory
+Contents"
+4. se selecteaza fisierul dorit
+5. se selecteaza optiunea "View/Set File Information"
+6. se va afisa lista de atribute ale fisierului care poate fi
+modificata. Stergerea atributelor se face cu Del si inserarea cu Ins
+
+	Pentru a modifica atributele unui director se parcurg urmatorii
+pasi:
+1. se lanseaza FILER
+2. se seteaza directorul curent cu optiunea "Select Current
+Directory"
+3. se afiseaza continutul directorului cu optiunea "Display Directory
+Contents"
+4. se selecteaza directorul dorit
+5. se selecteaza optiunea "View/Set Directory Information"
+6. se va afisa lista de atribute ale directorului care poate fi
+modificata. Stergerea atributelor se face cu Del si inserarea cu Ins
+
+		Modificarea utilizatorului care a creat
+			un fisier sau director
+
+	Pentru a modifica utilizatorul care a creat un director se
+parcurg urmatorii pasi:
+1. se lanseaza FILER
+2. se seteaza directorul curent cu optiunea "Select Current
+Directory"
+3. se afiseaza informatii despre directorul curent cu optiunea
+"Current Directory Information"
+4. se va afisa o lista de utilizatori din care se va selecta cel
+care va fi utilizatorul de creere a directorului in cauza
+
+		Modificarea mastilor de drepturi cu
+			ajutorul lui FILER
+
+	Aceasta operatie o pot efectua doar utilizatorii cu drept de
+ACCES CONTROL. 
+Pentru a seta masca de drepturi a unui director se parcurg urmatorii pasi:
+1. se lanseaza FILER
+2. se seteaza directorul curent cu optiunea "Select Current
+Directory"
+3. se afiseaza informatii despre directorul curent cu optiunea
+"Current Directory Information"
+4. se selecteaza optiunea "Inherited/Maximum Effective Rights"
+5. masca poate fi modificata cu tastele Del si Ins
+
+Pentru a seta masca de drepturi a unui fisier se parcurg urmatorii pasi:
+1. se lanseaza FILER
+2. se seteaza directorul curent cu optiunea "Select Current
+Directory"
+3. se selecteaza optiunea "Directory Contents"
+4. se selecteaza fisierul caruia i se va modifica masca
+5. se selecteaza optiunea "View/Set File Information"
+6. se selecteaza optiunea "Inherited Rights Mask"
+7. masca poate fi modificata cu tastele Del si Ins
+
+		Utilizarea comenzii NDIR
+
+	Comanda NDIR este mult mai puternica decat comanda DOS DIR. 
+	Folosita fara optiuni ea produce afisarea continutului unui
+director impreuna cu informatiile:
+- nume fisier
+- extensie
+- dimensiune
+- data ultimei modificari
+- atributele fisierului
+- file server-ul curent
+
+
+	In continuare sunt prezentate optiunile comenzii:
+(s-au scris cu litere mari prescurtarile care pot fi folosite)
+
+Optiune				Conditii indeplinite de fisiere
+------------------------------------------------------------------
+[NOT] A				atributul ARCHIVE 
+
+[NOT] EX			atributul EXECUTE ONLY
+
+[NOT] H 			atributul HIDDEN
+
+[NOT] I 			atributul INDEXED
+
+[NOT] RO			atributul READ ONLY
+
+[NOT] S 			atributul SHAREABLE
+
+[NOT] SY			atributul SYSTEM
+
+[NOT] T 			atributul TRANSACTIONAL
+
+ACCES [NOT]   			fisiere accesate inainte,
+BEFore|EQual|			la, dupa data specificata
+AFTer mm-dd-yy
+
+ARCHIVE [NOT] 			fisiere arhivate inainte,
+BEFore|EQual|			la, dupa data specificata
+AFTer mm-dd-yy
+
+CREATE [NOT] 			fisiere create inainte,
+BEFore|EQual|			la, dupa data specificata
+AFTer mm-dd-yy
+
+DATES				afiseaza si datele de arhivare,
+				de accesare, de modificare, 
+				de creere
+
+[REVerse] SORT ACcess		fisierele vor fi sortate
+				dupa data de accesare
+
+[REVerse] SORT ARchive		fisierele vor fi sortate
+				dupa data de arhivare
+
+[REVerse] SORT CReate		fisierele vor fi sortate
+				dupa data de creere
+
+[REVerse] SORT UPdate		fisierele vor fi sortate
+				dupa data ultimei modificari
+
+[REVerse] SORT QWner		fisierele vor fi sortate
+				in ordine alfabetica a 
+				utilizatorului care a creat 
+				fisierul
+
+[REVerse] SORT SIze		fisierele vor fi sortate
+				dupa dimensiune
+
+[REVerse] SORT UNsorted		fisierele vor fi nesortate
+
+UPdate [NOT] 			fisiere modificate inainte,
+BEFore|EQual|			la, dupa data specificata
+AFTer mm-dd-yy
+
+DO				listeaza informatii numai despre
+				subdirectoare
+
+SUB				listeaza informatii despre toate
+				subdirectoarele directorului
+				curent
+
+FO				listeaza numai fisierele
+
+MAC				listeaza fisiere si subdirectoare
+				Macintosh
+
+OWner [NOT] name		listeaza fisierele create de 
+				utilizatorul specificat prin name
+
+RIGHTS				afiseaza drepturile din masca
+				si drepturile efective asupra
+				subdirectoarelor
+
+SIze [NOT] GR|EQ|LE nnn		listeaza fisierele care au o
+				dimensiune mai mare decat|egala cu|
+				mai mica decat nnn
+
+		Copierea fisierelor cu COPY, XCOPY si NCOPY
+
+	Comenzile DOS COPY si XCOPY sunt limitate pe o retea. Pe o
+retea se foloseste de obicei NCOPY. 
+	Comanda COPY are doua dezavantaje:
+- nu intelege cai care contin nume de server sau volum. Ea genereaza
+un mesaj de eroare
+- nu poate copia atributele de retea ale fisierelor 
+	Daca calea dorita a fost asociata unei litere cu o comanda
+MAP anterioara, ea se poate folosi in cale.
+De exemplu:
+
+	COPY F:\DIR\*.* A:               corect
+	COPY FIRST-TRY/SYS:DIR\*.* a:    gresit
+
+	Comanda XCOPY nu genereaza eroare, dar in cazul in care in
+comanda sunt folosite numele server-ului sau al volumului, operatia nu 
+este efectuata corect.
+	De exemplu comanda:
+
+	XCOPY *.* SYS:TEMP
+
+- daca exista directorul TEMP pe volumul SYS, operatia de copiere este
+efectuata corect
+- daca nu exista directorul TEMP, XCOPY creaza un director SYS in
+directorul curent si va copia fisierele sursa in directorul creat
+	De aceea este preferabila utilizarea literelor asociate
+cailor dorite.
+
+	Pe retea se utilizeaza cel mai eficient comanda NCOPY. Ea
+copiaza fisierele impreuna cu atributele lor, si utilizeaza resursele
+retelei mai eficient. 
+	Comanda COPY copiaza fisierele astfel: fisierele din directorul 
+sursa sunt copiate in memoria locala a statiei, de unde sunt
+transferate in directorul destinatie. Comanda NCOPY coopereaza cu
+server-ul in sensul ca fisierele nu mai sunt copiate temporar in
+memoria statiei ci vor fi copiate direct. Evident timpul de copiere
+scade fata de cazul in care se foloseste comanda COPY.
+
+	Avantajele comenzii NCOPY fata de XCOPY sunt:
+- in cadrul cailor se pot folosi si nume de server si de volume
+- pot fi copiate fisiere de pe un server pe alt server daca
+utilizatorul este conectat la ambele server-e
+
+	In cadrul cailor specificate in comanda NCOPY nu se foloseste
+caracterul "/" deoarece acesta precede optiunile comenzii. De exemplu
+urmatoarea comanda va genera eroare din acest motiv:
+
+	NCOPY /DIR1/DIR2    /TEMP	gresit
+	NCOPY \DIR1\DIR2    \TEMP	corect
+	NCOPY F:/DIR1/DIR2    F:/TEMP	corect
+
+	Optiunile care se pot utiliza in cadrul comenzii NCOPY sunt:
+
+/s	se copiaza si subdirectoarele      
+/s/e	se copiaza si subdirectoarele chiar si cele goale
+/f	copiaza fisierele goale
+/i	informeaza cand se vor pierde fisiere non-DOS 
+/c	copiaza doar informatii DOS
+/a	copiaza fisiere cu atributul ARCHIVE setat pe ON
+/m 	copiaza fisiere cu atributul ARCHIVE setat pe ON si il
+	seteaza pe OFF
+/v	copierea se face cu verificare (citirea fisierului copiat)
+/h (/?) afiseaza optiunile comenzii
+
+
+
+
+
+
+
+
+

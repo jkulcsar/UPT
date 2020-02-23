@@ -1,0 +1,155 @@
+			LABORATOR  2
+			------------
+
+	Alocare dinamica
+	----------------
+        In C++, pentru alocarea dinamica de memorie pot fi folositi
+doi operatori creati special pentru acest scop, care inlocuiesc
+familiile de functii "free" si "malloc". Operatorul NEW este folosit
+pentru alocarea dinamica a memoriei, iar operatorul DELETE pentru
+eliberarea ei.
+        Operatorul "new" returneaza un pointer la zona de memorie
+alocata dinamic, si NULL daca alocarea esueaza. Operatorul "delete"
+va elibera zona de memorie la care pointeaza argumentul sau.
+
+	In C++ alocarea dinamica se face cu operatorul new astfel:
+
+ip = new tip_data
+ip = new tip_data(valoare initiala)    - zona alocata se
+					 initializeaza cu valoarea 
+					 specificata
+ip = new tip_data[n]	               - tablou unidimensional
+ip = new tip_data[n][m]	               - tablou unidimensional
+
+	Dezalocarea se face cu operatorul delete:
+
+delete ip
+
+	De obicei se testeaza valoarea returnata de operatia de
+alocare. Esecul se poate trata cu propria functie astfel:
+
+
+Exemplu
+-------
+
+#include <iostream.h>
+#include <new.h>
+
+void no_mem();
+void main()
+{
+  int *ip;
+  long dim;
+  set_new_handler(&no_mem);
+  cout<<"Dimensiune bloc ?"
+  cin>>dim;
+  for(int i=1;;i ++)
+  { ip = new int[dim];
+    cout<<"Alocare bloc i= ";
+    cout<<i<<"\n";
+  }
+}
+
+void no_mem()
+{
+  cout<<"Alocare imposibila\n";
+  exit(1);
+}
+
+		CONCEPTUL DE CLASA
+		------------------
+
+	In C++ incapsularea are la baza doua idei :
+1. cu ajutorul claselor se vor lega structurile de date si functiile destinate
+   manipularii lor.
+2. scetiunile private si publice  fac posibila separarea mecanismului intern 
+   de interfata cu utilizatorul.
+
+	- o CLASA  este un tip de date definit de catre utilizator, dar care se 
+comporta intocmai ca un tip predefinit.
+	- o INSTANTIERE a unei clase "CLASA" (sau un OBIECT) este o variabila 
+declarata ca fiind de tipul CLASA.
+	- o VARIABILA MEMBRU este o variabila declarata in cadrul unei clase
+	- o METODA este o functie declarata (sau definita) in cadrul unei clase
+si care poate accesa toate variabilele declarate in cadrul clasei. Metodele se 
+mai numesc si FUNCTII MEMBRU.
+	Prin MEMBRII unei clase se intelege totalitatea metodelor si 
+variabilelor membru ale clasei.
+
+Sintaxa :
+	Specificator_clasa Nume_clasa
+	{
+	  [ [ private : ] Lista_membri_1]
+	  [ [ public  : ] Lista_membri_2]
+	};
+
+Specificator_clasa poate fi "class", "struct" sau "union". Cuvintul cheie 
+"class" indica faptul ca urmeaza descrierea unei clase avind numele 
+"Nume_clasa". "struct" sau "union" descriu structuri de date avind aceleasi 
+proprietati ca si in C neobiectual, cu doua modificari :
+- li se pot atasa functii membru
+- pot fi compuse din doua sectiuni (una privata si una publica)
+	Descrierea propriu-zisa a clasei consta din cele doua liste de membrii,
+prefixate eventual de cuv. cheie "private" si "public".
+Membrii apartinind sectiunii "public" pot fi accesati de catre utilizator din
+orice punct al domeniului de existenta al respectivei clase, pe cind cei 
+apartinind sectiunii "private" (atit date cit si functii)nu pot fi accesati
+decit de catre metodele clasei respective. Utilizatorul clasei nu va avea acces 
+la ei decit prin intermediul metodelor publice.
+	Diferenta intre "class" si "struct", respectiv "union", consta in faptul
+ca daca lipsesc specificatorii "public" si "private", toti membrii lui "class" 
+vor fi IMPLICIT privati, iar cei ai lui "struct" si "union"  publici.
+
+	La definirea metodelor apartinind unei clase se prefixeaza numele
+procedurii cu numele clasei urmat de "::". Acest simbol se numeste "scope acces
+operator" si este utilizat in operatii de modificare a domeniului de 
+vizibilitate implicit, de exemplu :
+
+	int i;
+
+	void f1(void)
+	{
+	  int i;
+	  i++; 		// se va incrementa "i"-ul local
+	}
+	void f2(void)
+	{
+	  int i;
+	  ::i++;	// se va incrementa "i"-ul global
+	}
+
+In stinga lui "::" nu poate fi decit un nume de clasa sau nimic, in al doilea 
+caz, variabila prefixata trebuie sa fie globala! In lipsa numelui clasei in 
+fata functiei membru nu s-ar putea face distinctia intre diversele metode 
+purtind nume identice si apartinind unor clase diferite.
+	Accesarea variabilelor membru publice ale unei clase se face folosind 
+operatorii "." sau "->", dupa cum obiectul de care apartin este desemnat prin
+nume sau printr-un pointer. Variabilele membru private nu pot fi accesate
+decit in cadrul metodelor clasei respective.
+
+TEME
+----
+1. Sa se scrie functiile membre ale clasei Definition, declarate in 
+   fisierul ex5.cpp .
+
+2.Sa se scrie programul:
+  Meniu:
+	O limonada indulcita
+	O limonada neindulcita
+	Afiseaza total incasari
+	Termina
+
+  Clasa Lemon
+	privat:
+		total numar limonade (decrementare cu 1)
+		total numar lingurite de zahar (decrementare cu 2)
+		suma incasari (incrementare cu pretul corespunzator)
+	public:
+		bea o limonada indulcita 
+		bea o limonada neindulcita (verificare: mai este limonada?)
+		afisare total (afisare suma incasari)
+  In cazul in care se cere o limonada indulcita se fac verificarile:
+		- mai este limonada;
+		- mai este zahar;
+daca acestea nu se verifica, se afiseaza mesajele corespunzatoare.
+

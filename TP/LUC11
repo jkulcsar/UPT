@@ -1,0 +1,377 @@
+Lucrarea nr.11         Liste multiplu inlantuite
+
+1. Problema prezentata:
+
+    Sa se realizeze un program care raspunde la urmatoarele co-
+menzi:
+'a' - citeste trei linii continind datele asociate unei persoane,
+dupa cum urmeaza:
+      - nume
+      - loc de munca
+      - virsta
+si le retine intr-o evidenta ( daca numele este deja prezent se
+actualizeaza datele )
+'t' - citeste o linie continind un nume. In cazul in care acesta
+este prezent in evidenta se tiparesc datele asociate lui
+'l' - citeste o linie continind un loc de munca. Se tiparesc in 
+ordine alfabetica numele tuturor persoanelor cu locul de munca 
+respectiv
+'p' - se citeste o valoare intreaga. Se tiparesc in ordinea 
+virstei numele si datele tuturor persoanelor din evidenta, de 
+virsta mai mare ca cea citita.
+'s' - se citeste o linie continind un nume. Se elimina din evidenta 
+persoana cu numele respectiv
+'d' - se citeste o linie continind un loc de munca. Elimina din
+evidenta toate persoanele cu locul de munca respectiv
+'n' - tipareste in ordine alfabetica toate persoanele din evidenta
+si datele asociate lor
+'v' - tipareste in ordine descrescatoare a virstei lista nominala 
+a persoanelor din evidenta
+'f' - terminarea programului
+
+
+
+2. Rezolvarea problemei:
+
+Fisierul tip.h :
+
+ Nodul listei cuprinde urmatoarele cimpuri:
+   nume - pentru numele angajatului
+   loc_munca - pentru locul de munca
+   virsta - pentru virsta angajatului
+   alf - pentru inlantuirea in lista ordonata alfabetic
+   vircr - pentru inlantuirea in lista ordonata crescator
+           dupa virsta
+   virdes - pentru inlantuirea in lista ordonata descrescator
+           dupa virsta
+
+
+typedef struct nodl
+ {
+    char *nume;
+    char *loc_munca;
+    int virsta;
+    struct nodl *alf;
+    struct nodl *vircr;
+    struct nodl *virdes;
+ } nod;
+
+ nod *cauta(char*);
+ void introdu( char*,char*,int);
+ void afisalf( void );
+ void afisdes( void );
+ void afislm( char* );
+ void afisv( int );
+ void elimina( char* );
+ void ellm( char* );
+
+Fisierul l.c
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include "tip.h"
+
+static nod *inc1 =NULL, *inc2 =NULL, *inc3=NULL ;
+
+ nod *cauta( char *n)
+ {
+  nod *l;
+
+  for( l = inc1; l !=NULL ; l =l->alf)
+    if( strcmp(l->nume,n ) == 0) return l;
+  return NULL;
+ }
+
+ nod *scot1( nod *p, char *l)
+ {
+   nod *l1,*l2;
+
+    for(l1=l2=p; l1 != NULL && strcmp( l1->nume,l) < 0;
+    l2 = l1, l1=l1->alf);
+    if( l1 != NULL && strcmp (l1->nume,l) ==0)
+      if(l1 == l2 ) return p->alf;
+       else
+	{
+	  l2->alf = l1->alf;
+	  return p;
+	}
+     else
+     {
+       printf(" Eroare: %s nu apare in evidenta\n",l);
+       return p;
+     }
+  }
+
+
+ nod *scot2( nod *p, char *l)
+ {
+   nod *l1,*l2;
+
+    for(l1=l2=p; l1 != NULL && strcmp( l1->nume,l) !=0;
+    l2 = l1, l1=l1->vircr);
+    if( l1 != NULL && strcmp (l1->nume,l) ==0)
+      if(l1 == l2 ) return p->vircr;
+       else
+	{
+	  l2->vircr = l1->vircr;
+	  return p;
+	 }
+     else
+     {
+       printf(" Eroare: %s nu apare in evidenta\n",l);
+       return p;
+     }
+  }
+
+
+ nod *scot3( nod *p, char *l)
+ {
+   nod *l1,*l2;
+
+    for(l1=l2=p; l1 != NULL && strcmp( l1->nume,l) !=0;
+    l2 = l1, l1=l1->virdes);
+    if( l1 != NULL && strcmp (l1->nume,l) ==0)
+      if(l1 == l2 ) return p->virdes;
+       else
+	{
+	  l2->virdes = l1->virdes;
+	  return p;
+	 }
+     else
+     {
+       printf(" Eroare: %s nu apare in evidenta\n",l);
+       return p;
+     }
+  }
+
+nod *intr1( nod *p, nod *l)
+ {
+   nod *l1,*l2;
+
+    for(l1=l2=p; l1 != NULL && strcmp( l1->nume,l->nume) < 0;
+    l2 = l1, l1=l1->alf);
+    l->alf = l1;
+    if(l1 == l2 ) return l;
+    else
+    {
+      l2->alf = l;
+      return p;
+    }
+  }
+
+ nod *intr2( nod *p, nod *l)
+ {
+   nod *l1,*l2;
+
+    for(l1=l2=p; l1 != NULL && l1->virsta < l->virsta ;
+    l2 = l1, l1=l1->vircr);
+    l->vircr = l1;
+    if(l1 == l2 ) return l;
+    else
+    {
+      l2->vircr = l;
+      return p;
+    }
+  }
+
+ nod *intr3( nod *p,nod *l)
+ {
+   nod *l1,*l2;
+
+    for(l1=l2=p; l1 != NULL && l1->virsta> l->virsta ;
+    l2 = l1, l1=l1->virdes);
+    l->virdes = l1;
+    if(l1 == l2 ) return l;
+    else
+    {
+      l2->virdes = l;
+      return p;
+    }
+  }
+
+
+ void introdu(char *n,char *lm,int v)
+ {
+  nod *t;
+
+    if(( t = cauta( n )) != NULL)
+    {
+       free(t->loc_munca);
+       if( (t->loc_munca =(char*)malloc(strlen(lm) +1)) ==NULL)
+	  {
+	   printf("Eroare : memorie insuficienta\n");
+	   exit( 1 );
+	  }
+	else
+	  {
+	    strcpy( t->loc_munca,lm );
+	    t->virsta = v;
+	    inc2 =scot2(inc2,t->nume);
+	    inc2 =intr2(inc2,t);
+	    inc3 =scot3(inc3,t->nume);
+	    inc3 =intr3(inc3,t);
+
+	  }
+      }
+      else
+	if(( t = (nod*)malloc(sizeof(nod))) == NULL ||
+	( t->nume = (char*)malloc(strlen(n)+1)) == NULL ||
+	( t->loc_munca = (char*) malloc(strlen(lm) +1)) ==NULL )
+	{
+	  printf("Eroare : memorie insuficienta\n");
+	  exit( 1 );
+	}
+	else
+	{
+	     strcpy( t->nume,n);
+	     strcpy( t->loc_munca,lm );
+	     t->virsta = v;
+	     inc1 =intr1(inc1,t);
+	     inc2 =intr2(inc2,t);
+	     inc3 =intr3(inc3,t);
+	}
+   }
+
+
+ void afisalf( void )
+ {
+   nod *p;
+
+   for( p =inc1; p != NULL ; p =p->alf)
+    {
+       printf("nume : %s\n",p->nume);
+       printf("loc de munca : %s\n",p->loc_munca);
+       printf("virsta : %d\n\n",p->virsta);
+    }
+ }
+
+
+ void afisdes( void )
+ {
+   nod *p;
+
+   for( p =inc3; p != NULL ; p =p->virdes)
+       printf("nume : %s\n",p->nume);
+
+ }
+
+void afislm( char *lm )
+{
+ nod *l;
+
+ for( l=inc1; l != NULL; l = l->alf)
+   if( strcmp(l->loc_munca,lm) ==0 )
+      printf(" Numele : %s \n",l->nume);
+}
+
+void afisv( int v )
+{
+ nod *l;
+
+ for( l=inc2; l != NULL; l = l->vircr)
+   if( l->virsta > v )
+      printf(" Numele : %s \n",l->nume);
+
+}
+
+void elimin( char *s)
+{
+ inc1 = scot1( inc1,s );
+ inc2 = scot2( inc2,s );
+ inc3 = scot3( inc3,s );
+
+}
+
+void ellm( char *s)
+{
+ int k =1;
+ nod *l;
+
+  while( k==1 )
+  {
+   k =0;
+   for(l =inc1; l != NULL && k ==0; l=l->alf)
+    if( strcmp(l->loc_munca,s) == 0)
+     {
+      k =1;
+      elimin( l->nume );
+     }
+  }
+}
+
+Fisierul m9.c
+
+
+#include <stdio.h>
+#include <conio.h>
+#include "tip.h"
+
+  void meniu()
+  {
+   char c,s[30],lm[30];
+   int v;
+   nod *t;
+
+   while( 1 )
+   {
+   clrscr();
+   printf(" a........ Introduce in evidenta\n");
+   printf(" t........ Cauta un nume in evidenta\n");
+   printf(" l........ Tipareste persoanele cu un anumit loc de munca\n");
+   printf(" p........ Se afiseaza persoanele de virsta mai mare ca v\n");
+   printf(" s........ Elimina o persoana din evidenta\n");
+   printf(" d........ Se elimina persoanele cu un anumit loc de munca\n");
+   printf(" n........ Se afiseaza alfabetic persoanele din evidenta\n");
+   printf(" v........ Se afiseaza persoanele in ordinea virstei\n");
+   printf(" f........ Terminarea programului\n\n\n");
+   printf(" Introduceti optiune:");
+   c =getchar();getchar();
+   switch( c )
+   {
+   case 'a': gets( s );gets( lm ); scanf("%d",&v);
+	     introdu( s,lm,v );break;
+   case 'v': afisdes(); break;
+   case 't': gets( s );
+	     if ( (t =cauta(s)) != NULL )
+	       { printf(" Nume : %s\n",t->nume);
+		 printf(" Loc de munca : %s \n",t->loc_munca);
+		 printf(" virsta : %d\n",t->virsta);
+	       }
+	     else printf(" %s nu apare in evidenta\n",s);break;
+   case 'l': gets(s); afislm( s ); break;
+   case 'p': scanf("%d",&v); getchar();afisv( v ); break;
+   case 's': gets(s);  elimin( s ) ; break;
+   case 'd': gets( s ); ellm( s ); break;
+   case 'n': afisalf(); break;
+   case 'f': return;
+   }
+ getchar();
+ }
+}
+
+void main()
+  {
+   meniu();
+  }
+
+
+3.Probleme propuse:
+
+1. Sa se realizeze urmatorul program:
+ Se citeste un text oarecare ce se incheie cu o marca EOF. In 
+continuare programul raspunde unui numar de comenzi dupa cum
+urmeaza:
+'t' - tipareste identificatorii din evidenta si pentru fiecare 
+identificator numarul de aparitii( tiparirea se face in ordine
+alfabetica)
+'l' - tipareste identificatorii din evidenta si pentru fiecare 
+identificator numarul de aparitii( tiparirea se face in ordinea
+lungimii identificatorului)
+'s' - citeste o valoare n intreaga. Elimina din evidenta toti
+identificatorii care contin n vocale.
+'a' - tipareste identificatorii din evidenta in ordinea descres
+catoare a numarului de vocale continut
+'v' - se citeste o vocala c si un numar intreg n . Se cere sa se
+tipareasca in ordinea lungimii identificatorilor , acei identifi
+catori care contin vocala c cel putin de n ori.

@@ -1,0 +1,129 @@
+								LABORATOR  4
+								------------
+CONSTRUCTORI
+
+	Un constructor este o procedura care are acelasi nume ca si clasa careia
+ii apartine. Constructorii vor fi apelati ori de cite ori se creaza noi
+instantieri ale unei clase. Constructorul asigura initializarea corecta a
+tuturor variabilelor membru ale unui obiect si garanteaza ca initializarea
+unui obiect se va efectua o singura data.
+	In principiu, constructorii se declara, definesc si utilizeaza ca orice
+metoda uzuala, cu urmatoarele precizari :
+- constructorii poarta numele clasei careia ii apartin
+- constructorii nu pot returna valori; in plus, prin conventie, nici la
+definirea si nici la declararea lor nu poate fi specificat "void" ca tip
+returnat.
+- adresa constructorilor nu este accesibila utilizatorului; expresii de genul
+"&X::X()" sunt ilegale;
+- constructorii sunt apelati implicit ori de cite ori este nevoie.
+- in caz ca o clasa nu are nici un constructor declarat de catre programator,
+compilatorul va declara implicit unul. Acesta va fi public, fara nici un
+parametru, si va avea o lista vida de instructiuni.
+- in cadrul constructorilor se pot utiliza operatorii "new" si "delete".
+- constructorii pot avea parametrii luind valori implicite.
+	O clasa poate avea oriciti constructori, care vor avea acelasi nume dar
+vor diferi prin tipul si numarul parametrilor. Indiferent de modul in care se
+creaza un obiect, compilatorul va apela intotdeauna constructorul potrivit.
+
+DESTRUCTORI
+
+	Destructorul poate fi privit ca si complement al constructorului. Daca
+constructorii sunt folositi in special pentru a aloca memorie si pentru a
+efectua anumite operatii (de exemplu incrementarea unui contor al numarului
+de instantieri ale clasei), destructorii se utilizeaza la eliberarea memoriei
+alocate de primii si la efectuarea unor operatii inverse (de exemplu
+decrementarea aceluiasi contor).
+
+class B {
+ public :
+	B(void);	// constructor
+	~B(void);	// destructor
+};
+
+Exemplu:
+#define NULL 0
+
+struct s
+{
+  	int nr;
+  	struct s *next;
+};
+class B
+{
+  	int i;
+  	struct s *ps;
+ public:
+  	B(int);
+  	~B(void);
+};
+
+B::B(int ii=0)					// 3 si 7
+{
+  	ps = new s; 
+	ps->next = NULL; 
+	i = ps->nr = ii; 			// 4 si 8
+}                                               // 5 si 9
+
+B::~B(void)                        		// 11 si 14
+{
+  delete ps;                      		// 12 si 15
+}                                  		// 13 si 16
+
+void main(void)                    		// 1
+{
+  B *pb;
+  B b = 9;			  		// 2
+  pb = new B(3);                  		// 6
+  delete pb;                      		// 10
+}                                  		// 17
+
+De remarcat ca:
+- destructorii se apeleaza implicit in doua situatii: la eliberarea cu
+"delete" a memorie alocate dinamic pentru memorarea unor obiecte (linia 10)
+sau la parasirea domeniului de existenta al unei variabile (linia 17,
+variabila b). Daca in al doilea caz este vorba de variabile globale sau
+definite in "main", distrugerea lor se va face dupa ultima instructiune din
+"main", dar inainte de incheierea executiei programului.
+- in cazul obiectelor create dinamic, destructorul nu se va apela decit daca
+se incearca eliberarea (cu "delete") zonei de memorie (linia 10).
+- utilizatorul dispune de doua moduri de a provoca apelul unui destructor:
+	1. prin specificarea numelui sau
+		class B {
+		  public: ~B();
+		};
+		void f(void) {
+			B b;
+			b.B::~B(); // apel direct : e obligatoriu prefixul "B::"
+		}
+	2. prin folosirea lui "delete" (metoda indirecta, vezi linia 10).
+
+TIPURI DE CONSTRUCTORI
+	class X {
+	  X(X&);  	// constructor de copiere
+	  X(void);    // constructor implicit
+	};
+
+	Constructorul implicit ("default constructor") poate fi obtinut in doua
+moduri:
+a. prin definirea de catre utilizator a unui constructor fara nici un
+parametru.
+b. prin generarea sa implicita de catre compilator. Un astfel de constructor
+va fi creat ori de cite ori programatorul declara o clasa care nu are nici
+un constructor. In acest caz corpul constructorului nu va contine nici o
+instructiune.
+	Orice clasa trebuie sa posede un constructor de copiere. Compilatorul
+va genera implicit un astfel de constructor pentru fiecare clasa la care
+programatorul nu a facut-o in mod explicit. Constructorul de copiere generat
+implicit va copia membru cu membru toate variabilele argumentului in cele
+ale obiectului care apelaza metoda. El va fi apelat in situatii de genul :
+	X obiect2 = obiect1;
+sub forma echivalenta
+	X obiect2(obiect1);
+
+1. Studiati exemplele lab4_ex1.cpp, lab4_ex2.cpp.
+2. Completati lab4_ex1.cpp cu declaratia obiectului "la" ca fiind o
+copie a obiectului ls:
+	fifo la(ls);
+Urmariti rezultatul in cazul in care nu aveti un constructorde copiere
+explicit, apoi completati programul cu constructorul de copiere.
+	

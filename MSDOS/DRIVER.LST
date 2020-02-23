@@ -1,0 +1,466 @@
+Microsoft (R) Macro Assembler Version 5.10                  5/7/96 14:25:59
+
+'DEVICE DRIVER ... schelet instalabil'                      Page     1-1
+
+
+       1				
+       2				;Comment:	Nucleul unui driver ins
+					talabil care nu face decit sa se
+       3				;		instaleze corect. Mai r
+					amin de implementat rutinele concrete
+       4				;		de in/out.
+       5				;Istoric:	-
+       6				;--------------------------------------
+					---------------------------------------
+					-
+       7				
+       8				
+       9					name	driver
+      10					page	66,132
+      11					title	'DEVICE DRIVER ... schelet instalabil'
+      12				
+      13 = 0010					Max_Cmd		equ	16
+      14 = 000D					cr		equ	0Dh
+      15 = 000A					lf		equ	0Ah
+      16 = 0024					eom		equ	'$'
+      17				
+      18				;
+      19				;Driver-ul se organizeaza ca si un program COM dar cu ORG 0
+      20				;Un driver nu are PSP
+      21				;
+      22				
+      23 0000				code	segment	para	public	'CODE'
+      24					assume	cs:code, ds:code, es:code, ss:code
+      25 0000				driver  proc	far
+      26				;
+      27 0000					org	0
+      28				;
+      29				;Header driver instalabil
+      30				;
+      31 0000  FFFFFFFF				Header	dd	-1		;legatura cu driver-ul urmator
+      32									;-1 == sfirsit lista
+      33 0004  8000					dw	8000h		;cuvint atribut driver
+      34									;bit 15 =1 ==> dispozitiv caracter
+      35 0006  0038 R					dw	Strat		;offset rutina strategica
+      36 0008  0043 R					dw	Intr		;offset rutina intrerupere
+      37 000A  44 52 49 56 45 52			db	'DRIVER  '	;nume driver caracter
+      38       20 20			
+      39				
+      40				;
+      41				;Pointer la structura REQUEST
+      42				;Adresa de inceput a structurii request este transmisa de catre SO
+      43				;rutinei strategice prin ES:BX, iar aceasta o salveaza in locatia de mai jos
+      44				;
+      45 0012  00000000				RH_Ptr	dd	?
+      46				;
+      47				;Tabloul cu adresele rutinelor ce implementeaza driver-ul.
+      48				;Rutina de intrerupere foloseste acest tablou precum si 
+      49				;cimpul COMMAND din structura Request pentru a apela rutina
+      50				;dorita
+      51				;
+      52 0016				Dispatch:
+      53 0016  00AE R				dw	Init		; 0  = Initializare driver
+      54 0018  007E R				dw	Media_Chk	; 1  = media check (bloc)
+      55 001A  0081 R				dw	Build_BPB	; 2  = cost. bloc param BIOS
+      56 001C  0084 R				dw	IOCTL_Rd	; 3  = I/O control read
+      57 001E  0087 R				dw	Read		; 4  = citire de la dispozitiv
+      58 0020  008A R				dw	ND_Read		; 5  = citire nedistructiva
+Microsoft (R) Macro Assembler Version 5.10                  5/7/96 14:25:59
+
+'DEVICE DRIVER ... schelet instalabil'                      Page     1-2
+
+
+      59 0022  008D R				dw	Inp_Stat	; 6  = intoarce stare curenta citire
+      60 0024  0090 R				dw	Inp_Flush	; 7  = golire buffer dispozitiv intrare
+      61 0026  0093 R				dw	Write		; 8  = scriere la dispozitiv
+      62 0028  0096 R				dw	Write_Vfy	; 9  = scriere cu verificare
+      63 002A  009F R				dw	Outp_Stat	; 10 = intoarce stare curenta iesire
+      64 002C  0099 R				dw	Outp_Flush	; 11 = golire buffer dispozitiv iesire
+      65 002E  009C R				dw	IOCTL_Wrt	; 12 = I/O control write
+      66 0030  00A2 R				dw	Dev_Open	; 13 = deschidere dispozitiv
+      67 0032  00A5 R				dw	Dev_Close	; 14 = inchidere dispozitiv
+      68 0034  00A8 R				dw	Rem_Media	; 15 = mediu interschimbabil
+      69 0036  00AB R				dw	Out_Busy	; 16 = iesire pina la Busy
+      70				;
+      71				;
+      72				;Structura REQUEST prin care SO transfera informatii driver-ului
+      73				;si prin care acesta intoarce informatie in SO
+      74				;Atentie! Tot ce este cuprins intre <struc> si <ends>
+      75				;constituie declaratia unui nou tip de date. NU se aloca memorie!
+      76				;
+      77				Request		struc
+      78 0000  00					Rlenght		db	?	;lungimea structurii request
+      79 0001  00					Unit		db	?	;numar unitate
+      80 0002  00					Command		db	?	;cod comanda (corespunde
+      81										;unei rutine)
+      82 0003  0000					Status		dw	?	;cuvintul de stare intors de
+      83										;driver 
+      84										; - bit 15 = Eroare
+      85										; - bit 10-14 = Rezervati
+      86										; - bit 9 = Busy
+      87										; - bit 8 = Done
+      88										; - bit 0-7 = Cod eroare
+      89 0005  0008[					Reserve		db	8 dup(?);zona rezervata
+      90	   ??			
+      91			 ]	
+      92				
+      93 000D  00					Media		db	?	;octet descriptor mediu
+      94 000E  00000000					Address		dd	?	;adresa zonei de memorie pentru
+      95										;transfer
+      96 0012  0000					Count		dw	?	;valoare contor octet/sector
+      97 0014  0000					Sector		dw	?	;nr. de ordine al primului sector
+      98 0016				Request		ends
+      99				;
+     100				;
+     101				;De fiecare data cind se lanseaza o cerere catre dispozitivul corespunzator
+     102				;intii se apeleaza rutina strategica, apoi rutina de intrerupere
+     103				;
+     104				;Rutinei strategice i se transmite adresa structurii REQUEST prin ES:BX, care
+     105				;este salvata in locatii de memorie apoi se revine in MS-DOS
+     106				;
+     107 0038				Strat	proc	far
+     108 0038  2E: 89 1E 0012 R			mov	word ptr cs:[RH_Ptr], bx
+     109 003D  2E: 8C 06 0014 R			mov	word ptr cs:[RH_Ptr+2], es
+     110 0042  CB				ret
+     111 0043				Strat	endp
+     112				;
+     113				;Acest punct (adresa) este apelat de MS-DOS imediat dupa
+     114				;apelarea rutinei strategice. Rutina de intrerupere foloseste
+     115				;codul inscris in cimpul COMMAND din structura REQUEST pentru a
+     116				;determina rutina efectiva care se va executa. Rutina inscrie 
+     117				;in cimpul Status informatie de intoarcere
+     118				;
+     119 0043				Intr	proc	far
+     120 0043  50				push	ax 
+Microsoft (R) Macro Assembler Version 5.10                  5/7/96 14:25:59
+
+'DEVICE DRIVER ... schelet instalabil'                      Page     1-3
+
+
+     121 0044  53				push	bx 
+     122 0045  51				push	cx 
+     123 0046  52				push	dx 
+     124 0047  1E				push	ds 
+     125 0048  06				push	es 
+     126 0049  57				push	di 
+     127 004A  56				push	si
+     128 004B  55				push	bp
+     129				
+     130 004C  0E				push	cs	;astfel datele locale devin adresabile 
+     131 004D  1F				pop	ds
+     132				
+     133 004E  C4 3E 0012 R			les	di, [RH_Ptr]		;ES:DI = Adresa structurii REQUEST
+     134 0052  26: 8A 5D 02			mov	bl, es:[di.Command]
+     135 0056  32 FF				xor	bh, bh			;BX = Cod rutina
+     136				
+     137 0058  83 FB 10				cmp	bx, Max_Cmd		;trebuie sa fie cod corect
+     138 005B  7E 06				jle	ok
+     139 005D  B8 8003				mov	ax, 8003h		;cod eroare: rutina necunoscuta
+     140 0060  EB 0B 90				jmp	out_drv
+     141 0063				ok:	
+     142 0063  D1 E3				shl	bx, 1			;BX=BX*2 => index in tabela de salturi
+     143 0065  FF 97 0016 R			call	word ptr [bx+Dispatch]	;se apeleaza rutina corespunzatoare
+     144									;trebuie sa returneze un cod in AX
+     145 0069  C4 3E 0012 R			les	di, [RH_Ptr]		;se reface ES:DI ca si mai sus
+     146				;
+     147 006D				out_drv:
+     148 006D  0D 0100				or	ax, 0100h		;inscrie bitul DONE in status
+     149 0070  26: 89 45 03			mov	es:[di.Status], ax	;si salveaza-l in REQUEST
+     150				
+     151 0074  5D				pop	bp
+     152 0075  5E				pop	si
+     153 0076  5F				pop	di
+     154 0077  07				pop	es
+     155 0078  1F				pop	ds
+     156 0079  5A				pop	dx
+     157 007A  59				pop	cx
+     158 007B  5B				pop	bx
+     159 007C  58				pop	ax
+     160				
+     161 007D  CB				ret				;revenire in MS-DOS
+     162				;
+     163				;Driver-ul fiind un drv model, nu va implementa efectiv
+     164				;rutinele. Corpul lor depinde de la dispozitiv la disp.
+     165				;si de la cuplor la cuplor
+     166				;
+     167				;
+     168 007E				Media_Chk	proc	near
+     169 007E  33 C0					xor	ax, ax
+     170 0080  C3					ret
+     171 0081				Media_Chk	endp
+     172				;
+     173				;
+     174 0081				Build_BPB	proc	near
+     175 0081  33 C0					xor	ax, ax
+     176 0083  C3					ret
+     177 0084				Build_BPB	endp
+     178				;
+     179				;
+     180 0084				IOCTL_Rd	proc	near
+     181 0084  33 C0					xor	ax, ax
+     182 0086  C3					ret
+Microsoft (R) Macro Assembler Version 5.10                  5/7/96 14:25:59
+
+'DEVICE DRIVER ... schelet instalabil'                      Page     1-4
+
+
+     183 0087				IOCTL_Rd	endp
+     184				;
+     185				;
+     186 0087				Read		proc	near
+     187 0087  33 C0					xor	ax, ax
+     188 0089  C3					ret
+     189 008A				Read		endp
+     190				;
+     191				;
+     192 008A				ND_Read		proc	near
+     193 008A  33 C0					xor	ax, ax
+     194 008C  C3					ret
+     195 008D				ND_Read		endp
+     196				;
+     197				;
+     198 008D				Inp_Stat	proc	near
+     199 008D  33 C0					xor	ax, ax
+     200 008F  C3					ret
+     201 0090				Inp_Stat	endp
+     202				;
+     203				;
+     204 0090				Inp_Flush	proc	near
+     205 0090  33 C0					xor	ax, ax
+     206 0092  C3					ret
+     207 0093				Inp_Flush	endp
+     208				;
+     209				;
+     210 0093				Write		proc	near
+     211 0093  33 C0					xor	ax, ax
+     212 0095  C3					ret
+     213 0096				Write		endp
+     214				;
+     215				;
+     216 0096				Write_Vfy	proc	near
+     217 0096  33 C0					xor	ax, ax
+     218 0098  C3					ret
+     219 0099				Write_Vfy	endp
+     220				;
+     221				;
+     222 0099				Outp_Flush	proc	near
+     223 0099  33 C0					xor	ax, ax
+     224 009B  C3					ret
+     225 009C				Outp_Flush	endp
+     226				;
+     227				;
+     228 009C				IOCTL_Wrt	proc	near
+     229 009C  33 C0					xor	ax, ax
+     230 009E  C3					ret
+     231 009F				IOCTL_Wrt	endp
+     232				;
+     233				;
+     234 009F				Outp_Stat	proc	near
+     235 009F  33 C0					xor	ax, ax
+     236 00A1  C3					ret
+     237 00A2				Outp_Stat	endp
+     238				;
+     239				;
+     240 00A2				Dev_Open	proc	near
+     241 00A2  33 C0					xor	ax, ax
+     242 00A4  C3					ret
+     243 00A5				Dev_Open	endp
+     244				;
+Microsoft (R) Macro Assembler Version 5.10                  5/7/96 14:25:59
+
+'DEVICE DRIVER ... schelet instalabil'                      Page     1-5
+
+
+     245				;
+     246 00A5				Dev_Close	proc	near
+     247 00A5  33 C0					xor	ax, ax
+     248 00A7  C3					ret
+     249 00A8				Dev_Close	endp
+     250				;
+     251				;
+     252 00A8				Rem_Media	proc	near
+     253 00A8  33 C0					xor	ax, ax
+     254 00AA  C3					ret
+     255 00AB				Rem_Media	endp
+     256				;
+     257				;
+     258 00AB				Out_Busy	proc	near
+     259 00AB  33 C0					xor	ax, ax
+     260 00AD  C3					ret
+     261 00AE				Out_Busy	endp
+     262				;
+     263				;
+     264				;
+     265				;
+     266				;Rutina de initializare are sarcinile: sa initializeze perifericul,
+     267				;sa completeze pozitii in TVI (Tabela Vectori Intreruperi), 
+     268				;sa determine prima adresalibera. In cazul nostru adresa aceasta coincide
+     269				;cu adresa rutinei Init, astfel aceasta va fi rescrisa de driver-ul
+     270				;urmator
+     271				;
+     272 00AE				Init	proc	near
+     273 00AE  06				push	es
+     274 00AF  57				push	di
+     275 00B0  8C C8				mov	ax, cs
+     276 00B2  BB 00FD R			mov	bx, offset DHaddr
+     277 00B5  E8 010A R			call	hexasc
+     278 00B8  B4 09				mov	ah, 9
+     279 00BA  BA 00CE R			mov	dx, offset Ident
+     280 00BD  CD 21				int	21h
+     281 00BF  5F				pop	di
+     282 00C0  07				pop	es
+     283 00C1  26: C7 45 0E 00AE R		mov	word ptr es:[di.Address], offset init
+     284 00C7  26: 8C 4D 10			mov	word ptr es:[di.Address+2], cs
+     285 00CB  33 C0				xor	ax, ax
+     286 00CD  C3				ret
+     287 00CE				Init	endp
+     288				;
+     289 00CE  0D 0A 0A			Ident	db	cr,lf,lf
+     290 00D1  45 78 65 6D 70 6C		db	'Exemplu driver instalabil', cr,lf
+     291       75 20 64 72 69 76	
+     292       65 72 20 69 6E 73	
+     293       74 61 6C 61 62 69	
+     294       6C 0D 0A			
+     295 00EC  41 64 72 65 73 61		db	'Adresa Header la '
+     296       20 48 65 61 64 65	
+     297       72 20 6C 61 20		
+     298 00FD  78 78 78 78 3A 30	 DHAddr	db	'xxxx:0000'
+     299       30 30 30			
+     300 0106  0D 0A 0A 24			db	cr,lf,lf,eom
+     301 010A				Intr	endp
+     302				;
+     303				;
+     304				;Rutina 'hexasc' converteste un numar pe 16 biti in sir ASCII
+     305				;Intrari:	AX = valoare de convertit
+     306				;		DS:BX = adresa de inceput a sirului
+Microsoft (R) Macro Assembler Version 5.10                  5/7/96 14:25:59
+
+'DEVICE DRIVER ... schelet instalabil'                      Page     1-6
+
+
+     307				;Iesiri:	AX, BX distrusi
+     308				;
+     309 010A				hexasc	proc	near
+     310 010A  51				push	cx
+     311 010B  52				push	dx
+     312 010C  BA 0004				mov	dx,4
+     313 010F				ha1:
+     314 010F  B9 0004				mov	cx, 4
+     315 0112  D3 C0				rol	ax, cl
+     316 0114  8B C8				mov	cx, ax
+     317 0116  83 E1 0F				and	cx, 0Fh
+     318 0119  83 C1 30				add	cx,'0'
+     319 011C  83 F9 39				cmp	cx,'9'
+     320 011F  76 03				jbe	ha2
+     321 0121  83 C1 07				add	cx, 'A'-'9'-1
+     322 0124				ha2:
+     323 0124  88 0F				mov	[bx], cl
+     324 0126  43				inc	bx
+     325 0127  4A				dec	dx
+     326 0128  75 E5				jnz	ha1
+     327					
+     328 012A  5A				pop	dx
+     329 012B  59				pop	cx
+     330 012C  C3				ret
+     331 012D				hexasc	endp
+     332				;
+     333 012D				driver	endp
+     334				;
+     335 012D				code 	ends
+     336					end	;End of file ...
+Microsoft (R) Macro Assembler Version 5.10                  5/7/96 14:25:59
+
+'DEVICE DRIVER ... schelet instalabil'                      Symbols-1
+
+
+Structures and Records:
+
+                N a m e                 Width   # fields
+                                        Shift   Width   Mask    Initial
+
+REQUEST  . . . . . . . . . . . .  	0016	0009
+  RLENGHT  . . . . . . . . . . .  	0000
+  UNIT . . . . . . . . . . . . .  	0001
+  COMMAND  . . . . . . . . . . .  	0002
+  STATUS . . . . . . . . . . . .  	0003
+  RESERVE  . . . . . . . . . . .  	0005
+  MEDIA  . . . . . . . . . . . .  	000D
+  ADDRESS  . . . . . . . . . . .  	000E
+  COUNT  . . . . . . . . . . . .  	0012
+  SECTOR . . . . . . . . . . . .  	0014
+
+Segments and Groups:
+
+                N a m e         	Length	 Align	Combine Class
+
+CODE . . . . . . . . . . . . . .  	012D	PARA	PUBLIC	'CODE'
+
+Symbols:            
+
+                N a m e         	Type	 Value	 Attr
+
+BUILD_BPB  . . . . . . . . . . .  	N PROC	0081	CODE	Length = 0003
+
+CR . . . . . . . . . . . . . . .  	NUMBER	000D	
+
+DEV_CLOSE  . . . . . . . . . . .  	N PROC	00A5	CODE	Length = 0003
+DEV_OPEN . . . . . . . . . . . .  	N PROC	00A2	CODE	Length = 0003
+DHADDR . . . . . . . . . . . . .  	L BYTE	00FD	CODE
+DISPATCH . . . . . . . . . . . .  	L NEAR	0016	CODE
+DRIVER . . . . . . . . . . . . .  	F PROC	0000	CODE	Length = 012D
+
+EOM  . . . . . . . . . . . . . .  	NUMBER	0024	
+
+HA1  . . . . . . . . . . . . . .  	L NEAR	010F	CODE
+HA2  . . . . . . . . . . . . . .  	L NEAR	0124	CODE
+HEADER . . . . . . . . . . . . .  	L DWORD	0000	CODE
+HEXASC . . . . . . . . . . . . .  	N PROC	010A	CODE	Length = 0023
+
+IDENT  . . . . . . . . . . . . .  	L BYTE	00CE	CODE
+INIT . . . . . . . . . . . . . .  	N PROC	00AE	CODE	Length = 0020
+INP_FLUSH  . . . . . . . . . . .  	N PROC	0090	CODE	Length = 0003
+INP_STAT . . . . . . . . . . . .  	N PROC	008D	CODE	Length = 0003
+INTR . . . . . . . . . . . . . .  	F PROC	0043	CODE	Length = 00C7
+IOCTL_RD . . . . . . . . . . . .  	N PROC	0084	CODE	Length = 0003
+IOCTL_WRT  . . . . . . . . . . .  	N PROC	009C	CODE	Length = 0003
+
+LF . . . . . . . . . . . . . . .  	NUMBER	000A	
+
+MAX_CMD  . . . . . . . . . . . .  	NUMBER	0010	
+MEDIA_CHK  . . . . . . . . . . .  	N PROC	007E	CODE	Length = 0003
+
+ND_READ  . . . . . . . . . . . .  	N PROC	008A	CODE	Length = 0003
+
+OK . . . . . . . . . . . . . . .  	L NEAR	0063	CODE
+OUTP_FLUSH . . . . . . . . . . .  	N PROC	0099	CODE	Length = 0003
+OUTP_STAT  . . . . . . . . . . .  	N PROC	009F	CODE	Length = 0003
+OUT_BUSY . . . . . . . . . . . .  	N PROC	00AB	CODE	Length = 0003
+Microsoft (R) Macro Assembler Version 5.10                  5/7/96 14:25:59
+
+'DEVICE DRIVER ... schelet instalabil'                      Symbols-2
+
+
+OUT_DRV  . . . . . . . . . . . .  	L NEAR	006D	CODE
+
+READ . . . . . . . . . . . . . .  	N PROC	0087	CODE	Length = 0003
+REM_MEDIA  . . . . . . . . . . .  	N PROC	00A8	CODE	Length = 0003
+RH_PTR . . . . . . . . . . . . .  	L DWORD	0012	CODE
+
+STRAT  . . . . . . . . . . . . .  	F PROC	0038	CODE	Length = 000B
+
+WRITE  . . . . . . . . . . . . .  	N PROC	0093	CODE	Length = 0003
+WRITE_VFY  . . . . . . . . . . .  	N PROC	0096	CODE	Length = 0003
+
+@CPU . . . . . . . . . . . . . .  	TEXT  0101h		
+@FILENAME  . . . . . . . . . . .  	TEXT  driver		
+@VERSION . . . . . . . . . . . .  	TEXT  510		
+
+
+    325 Source  Lines
+    325 Total   Lines
+     50 Symbols
+
+  47162 + 343554 Bytes symbol space free
+
+      0 Warning Errors
+      0 Severe  Errors

@@ -1,0 +1,251 @@
+			METODE VIRTUALE
+		UTILIZAREA LISTELOR ETEROGENE
+
+	Prin definitie, un tablou omogen este un tablou ce contine elemente de 
+acelasi tip. Un pointer la o clasa "B" poate pastra adresa oricarei instantieri
+a vreunei clase derivate din "B". Deci, avand un sir de pointeri la obiecte de 
+tip "B" , inseamna ca, de fapt, putem lucra si cu tablouri neomogene. Astfel de
+tablouri neomogene se vor numi ETEROGENE. Una dintre caracteristicile limbajului 
+C++ consta tocmai in faptul ca mecanismul functiilor virtuale permite tratarea 
+uniforma a tuturor elementelor unui masiv de date eterogene. Acest lucru este 
+posibil datorita unor facilitati ce tin de asocieri facute doar in momentul 
+executiei programului, nu in momentul compilarii.
+
+	Fie o clasa "B" care poseda o metoda publica "M". Din clasa "B" se deriva
+mai multe clase "D1", "D2", "D3",...,"Dn". Daca aceste clase derivate redefinesc 
+metoda "M" se pune problema modului in care compilatorul este capabil sa identifice
+corect fiecare dintre aceste metode.
+
+	In mod obisnuit identificarea functiei membru in cauza se poate face prin
+una din urmatoarele metode:
+	1. prin unele diferente de semnatura (in cazul in care metoda a fost 
+	redeclarata)
+	2. prin prezenta unui "scope resolution operator" (o exprimare de genul 
+	"int a=B::M()" este univoca)
+	3. cu ajutorul obiectului caruia i se aplica metoda. O secventa de genul:
+		D1 d;
+		d.M();
+	nu lasa nici un dubiu asupra metodei in cauza.
+
+	In aceste cazuri, decizia este deosebit de simpla si poate fi luata chiar
+in faza de compilare.
+	In cazul prelucrarii de liste eterogene situatia este mai complicata, 
+fiind implicata o rezolvare mai tarzie a asociatiilor intre numele functiei 
+apelate si functia de apelat. 
+Fie sirul eterogen de pointeri la obiecte de tipul "B", "D1", "D2" etc.  Se 
+presupune, de exemplu, ca intr-o procedura se incearca apelarea metodei "M" 
+pentru fiecare obiect pointat de catre un element al sirului. Metoda de apelat 
+nu va fi cunoscuta in momentul compilarii deoarece nu este posibil sa se 
+stabileasca corect despre care din functii este vorba ("M"-ul din "B" sau cel 
+al unei clase derivate din "B"). Imposibilitatea identificarii metodei apare 
+deoarece informatiile privind tipul obiectului la care pointeaza un element 
+al sirului nu vor fi disponibile decat in momentul executarii programului.
+	
+	In continuare se analizeaza un exemplu clasic de tratare a unei liste 
+neomogene, care apoi este reluat utilizand functii virtuale.
+
+Exemplul 1: se construieste un sir de 4 elemente ce contine pointeri atat la 
+clasa "BAZA" cat si la "DERIVAT_1" si "DERIVAT_2".
+
+#include <iostream.h>
+typedef enum {_BAZA_, _DERIVAT_1, _DERIVAT_2} TIP;
+
+class BAZA{
+    protected:
+	int valoare;
+    public:
+	void set_valoare(int a) (valoare = a}
+	void tipareste_valoare(void)
+	{ 
+	  cout<<"Element BAZA cu VALOARE = "<<valoare<<"\n";
+	}
+};
+
+class DERIVAT_1 : public BAZA{
+    public:
+	void tipareste_valoare(void)
+	{
+	   cout<<"Element DERIVAT_1 cu VALOARE = "<<valoare<<"\n";
+	}
+};
+
+class DERIVAT_2 : BAZA {
+    public:
+	BAZA::set_val;   //metoda "set_val" va fi fortata la "public"
+	void tipareste_valoare(void)
+	{
+	   cout<<"Element DERIVAT_2 cu VALOARE = "<<valoare<<"\n";
+	}
+};
+
+class LISTA_ETEROGENA{
+	BAZA *pB;
+	TIP  t;
+    public:
+	void set(BAZA *p, TIP tp=_BAZA_)
+	{
+	  pB = p; t = tp;
+	}
+	void tipareste_valoare(void)
+	{   if(t==_BAZA_)
+		pB->tipareste_valoare();
+	    else
+		if(t==_DERIVAT_1)
+		   ((DERIVAT_1 *) pB->tpareste_valoare();
+		else
+		   ((DERIVAT_2 *) pB->tipareste_valoare();
+	}
+};
+
+void main()
+{  BAZA a[2];
+   DERIVAT_1 b1;
+   DERIVAT_2 b2;
+   LISTA_ETEROGENA p[4];
+
+   a[0].set_val(1);
+   a[1].set_val(2);
+   b1.set_val(3);
+   b2.set_val(4);
+
+   p[0].set(&a[0]);
+   p[1].set(&b1,_DERIVAT_1);  //se face o conversie implicita 
+				"DERIVAT_1"->"BAZA*"
+   p[2].set((BAZA *)&b2, _DERIVAT_2); //se face o conversie explicita 
+				        "DERIVAT_2"->"BAZA *"
+   p[3].set(&a[1]);
+   for(int i=0; i<4; i++)
+	p[i].tipareste_valoare();
+}
+
+In urma executiei programului, pe ecran se vor afisa urmatoarele mesaje:
+Element BAZA cu VALOARE = 1
+Element DERIVAT_1 cu VALOARE = 3
+Element DERIVAT_2 cu VALOARE = 4
+Element BAZA cu VALOARE = 2
+
+	Pentru a reusi o tratare uniforma a celor 3 tipuri de obiecte a fost
+necesara crearea unei a 4-a clase, numita LISTA_ETEROGENA. Aceasta va pastra 
+atat pointer-ul la obiectul respectiv, cat si o informatie suplimentara, 
+referitoare la tipul obiectului referit de pointer. Tiparirea informatiilor
+semnificative ale fiecarui obiect se va face in metoda 
+"LISTA_ETEROGENA::tipareste_valoarea". In aceasta functie membru sunt necesare
+o serie de teste pentru apelul metodei corespunzand fiecarui tip de obiect.
+
+Exemplul 2: prezinta o modalitate mult mai simpla si eleganta de a trata omogen
+un masiv de date eterogene. 
+
+#include <iostream.h>
+
+class BAZA{
+   protected:
+	int valoare;
+   public:
+	void set_val(int a) { valoare = a;}
+ 	virtual void tipareste_valoare(void)
+	{
+	   cout<<"Element BAZA cu VALOARE = "<<valoare<<"\n";
+	}
+};
+
+class DERIVAT_1 : public BAZA {
+   public:
+	void tipareste_valoare(void)
+	{
+	   cout<<"Element DERIVAT_1 cu VALOARE = "<<valoare<<"\n";
+	}
+};
+
+class DERIVAT_2 : BAZA {
+   public:
+	BAZA::set_val;
+	void tipareste_valoare(void)
+	{
+	   cout<<"Element DERIVAT_2 cu VALOARE = "<<valoare<<"\n";
+	}
+};
+
+class LISTA_ETEROGENA {
+	BAZA *pB;
+   public:
+	void set(BAZA *p) {pB = p;}
+	void tipareste_valoare(void)
+	{
+	   pB->tipareste_valoare();
+	}
+};
+
+void main()
+{
+   BAZA  a[2];
+   DERIVAT_1 b1;
+   DERIVAT_2 b2;
+   LISTA_ETEROGENA p[4];
+
+   a[0].set_val(1);
+   a[1].set_val(2);
+   b1.set_val(3);
+   b2.set_val(4);
+   p[0].set(&a[0]);
+   p[1].set(&b1);
+   p[2].set((BAZA *) &b2);
+   p[3].set(&a[1]);
+
+   for(int i+0; i<4; i++)
+      p[1].tipareste_valoare();
+}
+
+In acest caz clasa LISTA_ETEROGENA are o metoda "tipareste_valoarea" mult 
+simplificata. In noua functie membru nu mai este necesara nici testarea tipului 
+de pointer si nici conversia pointerului memorat la tipul original. Acestea se 
+realizeaza prin prefixarea metodei "BAZA::tipareste_valoarea" cu cuvantul cheie 
+"virtual". In urma intalnirii cuvantului "virtual" compilatorul va lua automat
+deciziile necesare.
+
+	Prefixarea unei metode "F" a clasei "B" cu cuvantul cheie "virtual" are 
+urmatorul efect: toate clasele ce o mostenesc pe "B" si nu redefinesc functia "F"
+o vor mosteni intocmai. Daca o clasa "D" derivata din "B" va redefini metoda "F"
+atunci compilatorul are sarcina de a asocia un set de informatii suplimentare, 
+cu ajutorul carora se va putea decide (in momentul executiei) care metoda "F" va
+fi apelata.
+
+OBSERVATII:
+
+1. Deoarece functiile virtuale necesita memorarea unor informatii suplimentare, 
+instantierile claselor care au metode virtuale vor ocupa in memorie mai mult loc 
+decat ar fi necesar in cazul in care nu ar exista decat metode ne-virtuale.
+   Nici FUNCTIILE NE_MEMBRU si nici METODELE STATICE NU POT FI DECLARATE VIRTUALE.
+
+2. Pentru ca mecanismul metodelor virtuale sa poata functiona, metoda in cauza 
+NU POATE FI REDECLARATA in cadrul claselor derivate ca avand aceiasi parametrii 
+si returnand un alt tip de data. In schimb, este permisa redeclararea cu un alt 
+set de argumente, dar cu acelasi tip de data returnat. dar in aceasta situatie, 
+noua functie nu va mai putea fi mostenita mai departe ca fiind metoda virtuala.
+
+3. Evitarea mecanismului de apel uzual pentru functiile virtuale se face foarte 
+usor prin prefixarea numeluifunctiei cu numele clasei apartinatoare urmat de "::"
+
+Ex:
+void DERIVAT::f1(void)
+{  BAZA::tipareste_valoare();  //apelul metodei din clasa BAZA
+   tipareste_valoare();        //apelul metodei din clasa DERIVAT
+
+4. Constructorii nu pot fi declarati virtual, insa destructorii accepta o astfel 
+de prefixare
+
+5. O functie virtuala "F", redefinita intr-o clasa derivata "D" va fi vazuta in 
+noua sa forma de catre toate clasele derivate din "D". Aceasta redefinire nu 
+afecteaza cu nimic faptul ca ea este virtuala, metoda ramanand in continuare 
+virtuala si pentru eventualele clase derivate din "D".
+
+6. Cand se pune problema de a decide daca o metoda sa fie sau nu virtuala, 
+programatorul va lua in considerare urmatoarele aspecte:
+- In cazul in care conteaza doar performantele unui program si se exclude intentia
+de a-l mai dezvolta in continuare, se va opta pentru metode ne-virtuale.
+- In cazul programelor ce urmeaza sa suporte dezvoltari ulterioare, situatia este 
+cu totul alta. Vor fi declarate virtuale toate acele metode ale clasei "CLASA" 
+care se considera ca ar putea fi redefinite in cadrul unor clase derivate din 
+"CLASA" si, in plus, modificarea va trebui sa fie sesizabila la "nivelul" lui 
+"CLASA". Toate celelalte metode pot ramane ne_virtuale.
+
+

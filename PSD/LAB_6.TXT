@@ -1,0 +1,117 @@
+Programarea Sistemelor de Conducere Distribuita
+
+			LABORATOR 6
+
+		Utilizarea meniurilor NetWare
+
+	Pasii care se parcurg in crearea unui meniu sunt:
+1. se creaza un director MENU astfel:
+
+	MD F:\RETELE\MENU
+
+2. se atribuie drepturile necesare in acest director
+
+	GRANT R W C E F IN SYS:RETELE\MENU TO GROUP RETEA
+
+3. se editeaza urmatorul fisier in orice editor de texte:
+
+A. Edit
+  \@ECHO OFF
+  MAP INSERT S1:=SYS:RETELE\APPS\EDIT > NUL:
+  MAP ROOT M:=H: > NUL:
+  M:
+  MD DOCS > NUL:
+  CD DOCS > NUL:
+  CLS
+  ECHO Standby...Starting EDIT
+  EDIT
+  CLS
+  ECHO Standby...Returning to menu
+  K:
+  MAP DEL S1: > NUL:
+  MAP DEL M: > NUL:
+X. Utilities
+  %Utilities
+Z. Logout
+  F:
+  !LOGOUT
+
+
+%Utilities,12,40
+Display file directory
+  DIR @1"Source drive"@2"Directory path"\\@3"File specification"|MORE
+  PAUSE
+Set Your Password
+  SETPASS
+  PAUSE
+View NetWare Maps
+  MAP
+  PAUSE
+
+4. se pun atributele S si RO ale fisierului nou editat pe ON, pentru
+a preveni stergerea accidentala si posibilitatea accesarii lui de
+catre mai multi utilizatori deodata
+
+	FLAG SYS:MENU\*.MNU S RO
+
+5. se introduc urmatoarele 3 linii in fisierele login script ale
+utilizatorilor TEST(1-6)
+
+	MAP K:=SYS:MENU
+	DRIVE K:
+	IF MEMBER OF "RETEA" THEN EXIT "MENU MENU01"
+
+6. pentru a testa meniul se recomanda parcurgerea urmatorilor 3 pasi:
+	1. se creaza directorul SYS:RETELE\APPS\EDIT
+	2. se seteaza drepturi pe acest director
+	   
+	   GRANT R F IN SYS:RETELE\APPS\EDIT TO GROUP RETEA
+	3. se copiaza programul EDIT.EXE din directorul DOS in
+directorul SYS:RETELE\APPS
+
+	Liniile din fisierul meniu, care incep cu caracterul "%",
+sunt titluri de meniuri. In fisierul MENU01 avem 2 meniuri: "Main
+Menu" si  "Utilities". Numerele de dupa titluri reprezinta linia si
+coloana in care va fi plasat centrul meniului. Liniile care incep din
+aceeasi coloana cu titlul meniului sunt optiunile din meniu. Ele au o
+litera (A, X, Z) in fata pentru a controla ordinea de afisare a
+optiunilor. Optiunile din meniu se afiseaza in ordinea alfabetica a
+lor. O optiune de meniu se poate selecta cu sagetile, sau tastand
+prima litera a optiunii. 
+	Liniile decalate sunt operatiile care se efectueaza la
+selectia optiunii. Daca o astfel de linie incepe cu caracterul "%",
+ea duce la deschiderea unui submeniu cu titlul specificat dupa
+caracter. Daca liniile nu vor fi decalate, ele se vor interpreta ca
+optiuni de meniu. 
+        Comanda LOGOUT este precedata de semnul "!" pentru a
+specifica meniului sa se inchida inainte de a executa comanda. Daca
+se foloseste comanda fara semnul "!" se vor obtine mesaje de eroare
+deoarece programul MENU creaza 2 fisiere temporare in directorul
+curent.
+        Comanda DIR foloseste 3 variabile care dupa ce iau valorile 
+introduse de catre utilizator, sunt plasate in comanda. Caracterele
+"@" si "%" sunt speciale pentru un meniu. Deci daca se doreste
+utilizarea lor in alte scopuri decat cele specificate, ele se vor
+folosi precedate de semnul "\". De exemplu \@echo off
+        Deoarece semnul "\" este semn special pentru texte in cazul
+in care se doreste utilizarea lui in alte scopuri decat cel descris
+se foloseste caracterul dublat. De exemplu:
+
+DIR \@1"Source drive"@2"Directory path"\\@3"File specification"|MORE
+
+
+                Afisarea meniurilor pe monitoare monochrome
+
+        Daca o statie este echipata cu un monitor monochrome,
+meniurile vor aparea destul de confuz deoarece ele sunt setate pentru
+monitoarele color. Pentru a putea rula meniurile si pe monitoarele
+monochrome se introduce urmatoarea comanda in fisierul shell.cfg al
+statiei in cauza:
+
+        SHORT MACHINE TYPE=CMPQ
+
+        Aceasta comanda duce la utilizarea setarilor specificate in
+fisierul CMPQ$RUN.OVL care se refera la monitoare monochrome, in
+locul setarilor din fisierul IBM$RUN.OVL care se refera la
+monitoarele color.
+        

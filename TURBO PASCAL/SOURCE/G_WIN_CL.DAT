@@ -1,0 +1,44 @@
+
+  # include "sttng_cl.dat"
+  # define MARGINE 8
+
+  class general_window : settings
+  {
+    private:
+
+    //..................... Variabile membru ...................
+
+      int x,y,dx,dy;          // coordonatele colturilor
+			      // stinga-sus si dreapta-jos
+
+      void *store_image;      // pointer la imaginea peste care va fi
+			      // desenata fereastra
+
+      int image_size;         // lungimea (in octeti) a zonei de mai sus
+
+      char *window_name;      // pastreaza numele ferestrei
+
+      int name_size;	      // lungimea numelui ferestrei (nr. caractere)
+
+    //..................... Metode .............................
+
+      void set_xy( void );    // initializeaza coordonatele ferestrei
+
+      void get_image( void ); // salvare imagine de sub fereastra
+
+      void draw_window( void );  // deseneaza efectiv fereastra
+
+      int bad_coord( int, int, int, int );  // verifica coord. colturilor
+
+    protected:
+
+      void my_settings( int, int ); // seteaza caracteristici noi
+
+      settings::get_settings;   // forteaza la "protected" cele
+      settings::put_settings;   // doua metode mostenite
+
+    public:
+
+      void create_window( char *, int, int, int, int );
+      void destroy_window( void );
+  };
